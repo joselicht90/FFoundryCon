@@ -1,0 +1,65 @@
+name: ffoundrycon
+description: "Companion app para Foundry VTT."
+publish_to: 'none'
+version: 2.1.0+11
+
+environment:
+  sdk: ^3.9.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # Networking
+  dio: ^5.7.0
+
+  # State management + DI
+  flutter_riverpod: ^2.6.1
+
+  # Chat en vivo
+  web_socket_channel: ^3.0.1
+
+  # Serialization
+  json_annotation: ^4.12.0
+
+  # Local storage
+  shared_preferences: ^2.3.3
+
+  # Notificaciones locales (turno de combate vía el WS)
+  flutter_local_notifications: ^18.0.1
+
+  # Mantener la pantalla encendida (opción de la app)
+  wakelock_plus: ^1.2.8
+
+  # Logging
+  logger: ^2.4.0
+
+  # Tipografía (Cinzel / Signika)
+  google_fonts: ^6.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+  # Code generation
+  build_runner: ^2.4.13
+  json_serializable: ^6.8.0
+
+  # Iconos de la app
+  flutter_launcher_icons: ^0.14.1
+
+# Configuración del icono de la app. Generar con:
+#   fvm dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  background_color_ios: "#1A1B1F"
+  image_path: "assets/icon/app_icon.png"
+  adaptive_icon_background: "#1A1B1F"
+  adaptive_icon_foreground: "assets/icon/app_icon.png"
+
+flutter:
+  uses-material-design: true

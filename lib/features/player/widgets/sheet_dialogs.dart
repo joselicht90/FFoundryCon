@@ -9,6 +9,7 @@ import '../../../controllers/session_controller.dart';
 import '../../../core/settings/app_settings.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../models/foundry_actor.dart';
+import 'cast_result_sheet.dart';
 import 'roll_card.dart';
 import 'sheet_kit.dart';
 import 'target_picker.dart';
@@ -581,6 +582,20 @@ Future<void> castWithTargets(
     return;
   }
   if (!c.mounted) return;
+  // Ataques/hechizos con tirada: dejamos abierta la hoja de resultado para
+  // re-tirar ataque/daño sin volver a gastar el recurso (igual que la
+  // tarjeta persistente de MidiQOL en el chat de Foundry).
+  if (hasAttack) {
+    await showCastResultSheet(c, ref,
+        itemId: itemId,
+        name: name,
+        activityId: activityId,
+        targetIds: targets,
+        hasAttack: true,
+        hasDamage: true,
+        ownerId: ownerId);
+    return;
+  }
   sheetToast(c, castLevel != null ? '$name (nivel $castLevel) → Foundry' : '$name → Foundry');
 }
 

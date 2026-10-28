@@ -16,10 +16,10 @@ app has no equivalent: `castWithTargets()` fires a single `use(action:'use')`
 and shows a toast; there is no way to re-roll attack/damage for that same
 cast from the app UI.
 
-## Authoritative facts (verified live against reader.r4spi.com, 2026-09-27)
+## Authoritative facts (verified live against the reader, 2026-09-27)
 
-Actor "Helion Vassor" (`2azqlJk7O70BCRGP`), item Scorching Ray
-(`ScorchiRay224III`, activity `attackScorcRayII`), level-2 slots at 2/3
+A test caster actor, item Scorching Ray
+(attack activity), level-2 slots at 2/3
 before and after both calls below (unchanged):
 
 - `POST /api/actors/:id/use {itemId, activityId, action:'attack',
@@ -74,7 +74,7 @@ No change to `foundry-data-reader` is needed. `action:'attack'|'damage'` on
 ## Verification method
 
 - `fvm flutter analyze` and `fvm flutter test`.
-- Manual end-to-end against the live reader (`reader.r4spi.com`): cast
+- Manual end-to-end against the live reader: cast
   Scorching Ray, confirm sheet + rolls, confirm slot count unchanged via
   `GET /api/actors/:id` before/after pressing ATAQUE/DAÑO.
 
@@ -85,7 +85,7 @@ No change to `foundry-data-reader` is needed. `action:'attack'|'damage'` on
   reader.
 - Smoke-tested via `scripts/run_flutter.sh` (`fvm flutter run -d chrome
   --debug`): app compiles and launches with the new widget wired in, and
-  performs a real `GET /api/worlds` (200) against `reader.r4spi.com`. No
+  performs a real `GET /api/worlds` (200) against the live reader. No
   exceptions from `cast_result_sheet.dart`/`sheet_dialogs.dart`. This only
   proves the code compiles/runs, not the actual cast → sheet → re-roll flow
   (Chrome web session has no live Foundry actor session to cast from).

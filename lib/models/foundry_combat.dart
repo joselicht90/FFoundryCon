@@ -6,10 +6,10 @@ class CombatantHp {
   const CombatantHp({required this.value, required this.max, this.temp = 0});
 
   factory CombatantHp.fromJson(Map<String, dynamic> j) => CombatantHp(
-        value: (j['value'] as num?)?.toInt() ?? 0,
-        max: (j['max'] as num?)?.toInt() ?? 0,
-        temp: (j['temp'] as num?)?.toInt() ?? 0,
-      );
+    value: (j['value'] as num?)?.toInt() ?? 0,
+    max: (j['max'] as num?)?.toInt() ?? 0,
+    temp: (j['temp'] as num?)?.toInt() ?? 0,
+  );
 }
 
 /// Un combatiente en el orden de iniciativa.
@@ -42,19 +42,19 @@ class Combatant {
   bool get isFriendly => disposition >= 1;
 
   factory Combatant.fromJson(Map<String, dynamic> j) => Combatant(
-        id: j['id'] as String? ?? '',
-        name: j['name'] as String? ?? '?',
-        img: j['img'] as String?,
-        initiative: (j['initiative'] as num?)?.toDouble(),
-        actorId: j['actorId'] as String?,
-        tokenId: j['tokenId'] as String?,
-        hidden: j['hidden'] as bool? ?? false,
-        defeated: j['defeated'] as bool? ?? false,
-        disposition: (j['disposition'] as num?)?.toInt() ?? 0,
-        hp: j['hp'] is Map<String, dynamic>
-            ? CombatantHp.fromJson(j['hp'] as Map<String, dynamic>)
-            : null,
-      );
+    id: j['id'] as String? ?? '',
+    name: j['name'] as String? ?? '?',
+    img: j['img'] as String?,
+    initiative: (j['initiative'] as num?)?.toDouble(),
+    actorId: j['actorId'] as String?,
+    tokenId: j['tokenId'] as String?,
+    hidden: j['hidden'] as bool? ?? false,
+    defeated: j['defeated'] as bool? ?? false,
+    disposition: (j['disposition'] as num?)?.toInt() ?? 0,
+    hp: j['hp'] is Map<String, dynamic>
+        ? CombatantHp.fromJson(j['hp'] as Map<String, dynamic>)
+        : null,
+  );
 }
 
 /// Estado del combate activo de Foundry.
@@ -85,16 +85,17 @@ class FoundryCombat {
   }
 
   factory FoundryCombat.fromJson(Map<String, dynamic> j) => FoundryCombat(
-        active: j['active'] as bool? ?? false,
-        round: (j['round'] as num?)?.toInt() ?? 0,
-        turn: (j['turn'] as num?)?.toInt() ?? 0,
-        currentId: j['currentId'] as String?,
-        roundStartedAt: (j['roundStartedAt'] as num?)?.toInt() ?? 0,
-        autonomousNpc: j['autonomousNpc'] as bool? ?? false,
-        combatants: (j['combatants'] as List?)
-                ?.whereType<Map<String, dynamic>>()
-                .map(Combatant.fromJson)
-                .toList() ??
-            const [],
-      );
+    active: j['active'] as bool? ?? false,
+    round: (j['round'] as num?)?.toInt() ?? 0,
+    turn: (j['turn'] as num?)?.toInt() ?? 0,
+    currentId: j['currentId'] as String?,
+    roundStartedAt: (j['roundStartedAt'] as num?)?.toInt() ?? 0,
+    autonomousNpc: j['autonomousNpc'] as bool? ?? false,
+    combatants:
+        (j['combatants'] as List?)
+            ?.whereType<Map<String, dynamic>>()
+            .map(Combatant.fromJson)
+            .toList() ??
+        const [],
+  );
 }

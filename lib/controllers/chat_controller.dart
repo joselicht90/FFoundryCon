@@ -49,19 +49,25 @@ class ChatController extends AsyncNotifier<List<ChatMessage>> {
     if (cur == null) return;
     final since = cur.isEmpty ? 0 : (cur.last.timestamp - 2000);
     try {
-      final fresh =
-          await ref.read(foundryRepositoryProvider).getChat(since: since, limit: 60);
+      final fresh = await ref
+          .read(foundryRepositoryProvider)
+          .getChat(since: since, limit: 60);
       for (final m in fresh) {
         _append(m);
       }
-    } catch (_) {/* silencioso */}
+    } catch (_) {
+      /* silencioso */
+    }
   }
 
   void _append(ChatMessage m) {
     final cur = state.valueOrNull ?? const <ChatMessage>[];
     if (cur.any((x) => x.id == m.id)) return;
-    final next = [...cur, m]..sort((a, b) => a.timestamp.compareTo(b.timestamp));
-    state = AsyncData(next.length > 200 ? next.sublist(next.length - 200) : next);
+    final next = [...cur, m]
+      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+    state = AsyncData(
+      next.length > 200 ? next.sublist(next.length - 200) : next,
+    );
   }
 
   Future<void> send({
@@ -110,4 +116,6 @@ class ChatController extends AsyncNotifier<List<ChatMessage>> {
 }
 
 final chatControllerProvider =
-    AsyncNotifierProvider<ChatController, List<ChatMessage>>(ChatController.new);
+    AsyncNotifierProvider<ChatController, List<ChatMessage>>(
+      ChatController.new,
+    );

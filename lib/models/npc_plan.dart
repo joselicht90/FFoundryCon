@@ -28,16 +28,16 @@ class NpcPlan {
   });
 
   factory NpcPlan.fromJson(Map<String, dynamic> j) => NpcPlan(
-        raw: j,
-        npcName: j['npcName'] as String? ?? '?',
-        targetName: j['targetName'] as String? ?? '?',
-        weaponName: j['weaponName'] as String? ?? '?',
-        reason: j['reason'] as String? ?? '',
-        distanceFt: (j['distanceFt'] as num?)?.toInt() ?? 0,
-        reachFt: (j['reachFt'] as num?)?.toInt() ?? 0,
-        needsMove: j['needsMove'] as bool? ?? false,
-        willAttack: j['willAttack'] as bool? ?? false,
-        autonomous: j['autonomous'] as bool? ?? false,
-        style: (j['intelligence'] as Map?)?['style'] as String? ?? 'normal',
-      );
+    raw: j,
+    npcName: j['npcName'] as String? ?? '?',
+    targetName: j['targetName'] as String? ?? '?',
+    weaponName: j['weaponName'] as String? ?? '?',
+    reason: j['reason'] as String? ?? '',
+    distanceFt: (j['distanceFt'] as num?)?.toInt() ?? 0,
+    reachFt: (j['reachFt'] as num?)?.toInt() ?? 0,
+    needsMove: j['needsMove'] as bool? ?? false,
+    willAttack: j['willAttack'] as bool? ?? false,
+    autonomous: j['autonomous'] as bool? ?? false,
+    style: (j['intelligence'] as Map?)?['style'] as String? ?? 'normal',
+  );
 }

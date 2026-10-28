@@ -48,9 +48,15 @@ class StatsBar extends ConsumerWidget {
           onLongPress: () => _damageHeal(context, ref),
           onTap: edit
               ? () async {
-                  final v = await showNumberDialog(context, 'PV actuales', hp.value);
+                  final v = await showNumberDialog(
+                    context,
+                    'PV actuales',
+                    hp.value,
+                  );
                   if (v != null && context.mounted) {
-                    await editAction(context, ref, {'system.attributes.hp.value': v});
+                    await editAction(context, ref, {
+                      'system.attributes.hp.value': v,
+                    });
                   }
                 }
               : null,
@@ -63,9 +69,14 @@ class StatsBar extends ConsumerWidget {
           onTap: edit && actor.acEditable
               ? () async {
                   final v = await showNumberDialog(
-                      context, 'CA (flat)', actor.acFlat ?? actor.ac ?? 10);
+                    context,
+                    'CA (flat)',
+                    actor.acFlat ?? actor.ac ?? 10,
+                  );
                   if (v != null && context.mounted) {
-                    await editAction(context, ref, {'system.attributes.ac.flat': v});
+                    await editAction(context, ref, {
+                      'system.attributes.ac.flat': v,
+                    });
                   }
                 }
               : null,
@@ -77,18 +88,26 @@ class StatsBar extends ConsumerWidget {
           color: Colors.teal,
           onTap: edit
               ? () async {
-                  final v = await showNumberDialog(context,
-                      'Velocidad (${actor.speedUnits})',
-                      int.tryParse(actor.speed ?? '') ?? 30);
+                  final v = await showNumberDialog(
+                    context,
+                    'Velocidad (${actor.speedUnits})',
+                    int.tryParse(actor.speed ?? '') ?? 30,
+                  );
                   if (v != null && context.mounted) {
-                    await editAction(
-                        context, ref, {'system.attributes.movement.walk': '$v'});
+                    await editAction(context, ref, {
+                      'system.attributes.movement.walk': '$v',
+                    });
                   }
                 }
               : null,
         ),
         if (actor.prof != null)
-          _Chip(icon: Icons.star, label: 'Comp', value: '+${actor.prof}', color: AppColors.gold),
+          _Chip(
+            icon: Icons.star,
+            label: 'Comp',
+            value: '+${actor.prof}',
+            color: AppColors.gold,
+          ),
         if (actor.initiative != null)
           _Chip(
             icon: Icons.bolt,
@@ -140,9 +159,18 @@ class _Chip extends StatelessWidget {
           children: [
             Icon(icon, size: 15, color: color),
             const SizedBox(width: 5),
-            Text('$label ', style: const TextStyle(color: Colors.grey, fontSize: 12)),
-            Text(value,
-                style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 13)),
+            Text(
+              '$label ',
+              style: const TextStyle(color: Colors.grey, fontSize: 12),
+            ),
+            Text(
+              value,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
+            ),
             if (onTap != null) ...[
               const SizedBox(width: 4),
               Icon(Icons.edit, size: 11, color: color),

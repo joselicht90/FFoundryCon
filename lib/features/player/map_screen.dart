@@ -88,13 +88,21 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           final mine = _tokens.where(_canControl).toList();
           if (mine.isNotEmpty) {
             _selectedId = mine
-                .firstWhere((t) => t.actorId == actorId, orElse: () => mine.first)
+                .firstWhere(
+                  (t) => t.actorId == actorId,
+                  orElse: () => mine.first,
+                )
                 .id;
           }
         }
       });
     } catch (e) {
-      if (mounted && first) setState(() { _loading = false; _error = '$e'; });
+      if (mounted && first) {
+        setState(() {
+          _loading = false;
+          _error = '$e';
+        });
+      }
     }
   }
 
@@ -108,7 +116,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   }
 
   // ---------- drag ----------
-  void _onDragStart(FoundryScene scene, List<FoundryToken> visible, Offset local) {
+  void _onDragStart(
+    FoundryScene scene,
+    List<FoundryToken> visible,
+    Offset local,
+  ) {
     if (_measure) return;
     final cx = local.dx / _s + scene.sceneX;
     final cy = local.dy / _s + scene.sceneY;
@@ -116,7 +128,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       if (!_canControl(t)) continue;
       final tw = t.gw * scene.gridSize, th = t.gh * scene.gridSize;
       if (cx >= t.x && cx <= t.x + tw && cy >= t.y && cy <= t.y + th) {
-        setState(() { _dragId = t.id; _dragLocal = local; _selectedId = t.id; });
+        setState(() {
+          _dragId = t.id;
+          _dragLocal = local;
+          _selectedId = t.id;
+        });
         return;
       }
     }
@@ -126,7 +142,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final id = _dragId;
     final local = _dragLocal;
     if (id == null || local == null) {
-      setState(() { _dragId = null; _dragLocal = null; });
+      setState(() {
+        _dragId = null;
+        _dragLocal = null;
+      });
       return;
     }
     FoundryToken? t;
@@ -143,7 +162,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       _dragId = null;
       _dragLocal = null;
       _pending[id] = (x: nx.toDouble(), y: ny.toDouble());
-      _tokens = _tokens.map((x) => x.id == id ? x.copyWith(x: nx.toDouble(), y: ny.toDouble()) : x).toList();
+      _tokens = _tokens
+          .map(
+            (x) =>
+                x.id == id ? x.copyWith(x: nx.toDouble(), y: ny.toDouble()) : x,
+          )
+          .toList();
     });
     try {
       await ref.read(tokenControllerProvider.notifier).moveTo(id, nx, ny);
@@ -153,7 +177,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   // ---------- measure ----------
   void _onTapMeasure(FoundryScene scene, Offset local) {
     if (!_measure) return;
-    final c = Offset(local.dx / _s + scene.sceneX, local.dy / _s + scene.sceneY);
+    final c = Offset(
+      local.dx / _s + scene.sceneX,
+      local.dy / _s + scene.sceneY,
+    );
     setState(() {
       if (_measA == null || _measB != null) {
         _measA = c;
@@ -174,10 +201,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   }
 
   void _toggleMeasure() => setState(() {
-        _measure = !_measure;
-        _measA = null;
-        _measB = null;
-      });
+    _measure = !_measure;
+    _measA = null;
+    _measB = null;
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -186,17 +213,20 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final content = _loading
         ? const Center(child: CircularProgressIndicator())
         : _error != null
-            ? Center(child: Text('Error: $_error'))
-            : scene == null
-                ? const Center(
-                    child: Text('No hay escena activa',
-                        style: TextStyle(color: AppColors.label)))
-                : Stack(
-                    children: [
-                      Positioned.fill(child: _map(scene, isGM)),
-                      _overlay(scene),
-                    ],
-                  );
+        ? Center(child: Text('Error: $_error'))
+        : scene == null
+        ? const Center(
+            child: Text(
+              'No hay escena activa',
+              style: TextStyle(color: AppColors.label),
+            ),
+          )
+        : Stack(
+            children: [
+              Positioned.fill(child: _map(scene, isGM)),
+              _overlay(scene),
+            ],
+          );
 
     if (widget.embedded) return content;
     return Scaffold(
@@ -232,7 +262,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
     // Región visible (coords del canvas) para ocultar tokens en la oscuridad.
     final region = isGM ? null : visibleRegionCanvas(fogTokens, scene);
-    final visible = _tokens.where((t) => _tokenVisible(scene, t, isGM, region)).toList();
+    final visible = _tokens
+        .where((t) => _tokenVisible(scene, t, isGM, region))
+        .toList();
 
     return InteractiveViewer(
       minScale: 0.4,
@@ -246,9 +278,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               _s = cons.maxWidth / sw;
               return GestureDetector(
                 onTapUp: (d) => _onTapMeasure(scene, d.localPosition),
-                onLongPressStart: (d) => _onDragStart(scene, visible, d.localPosition),
+                onLongPressStart: (d) =>
+                    _onDragStart(scene, visible, d.localPosition),
                 onLongPressMoveUpdate: (d) {
-                  if (_dragId != null) setState(() => _dragLocal = d.localPosition);
+                  if (_dragId != null) {
+                    setState(() => _dragLocal = d.localPosition);
+                  }
                 },
                 onLongPressEnd: (_) => _onDragEnd(scene),
                 child: Stack(
@@ -266,7 +301,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       Positioned.fill(
                         child: CustomPaint(
                           painter: _MeasurePainter(
-                            a: _measA!, b: _measB, scene: scene, s: _s),
+                            a: _measA!,
+                            b: _measB,
+                            scene: scene,
+                            s: _s,
+                          ),
                         ),
                       ),
                     for (final t in visible) _marker(scene, t),
@@ -283,13 +322,19 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   /// Un token se muestra si: es GM, es propio (siempre), o —para jugadores— no
   /// está oculto y su centro cae dentro de la región visible (luz/visión).
   bool _tokenVisible(
-      FoundryScene scene, FoundryToken t, bool isGM, Path? region) {
+    FoundryScene scene,
+    FoundryToken t,
+    bool isGM,
+    Path? region,
+  ) {
     if (isGM) return true;
     if (t.hidden) return false;
     if (_canControl(t)) return true;
     if (region == null) return true; // sin datos de visión → no ocultamos
     final c = Offset(
-        t.x + t.gw * scene.gridSize / 2, t.y + t.gh * scene.gridSize / 2);
+      t.x + t.gw * scene.gridSize / 2,
+      t.y + t.gh * scene.gridSize / 2,
+    );
     return region.contains(c);
   }
 
@@ -311,8 +356,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final color = t.isHostile
         ? AppColors.tokenEnemy
         : (t.isFriendly || controllable)
-            ? AppColors.tokenAlly
-            : const Color(0xFF555A63);
+        ? AppColors.tokenAlly
+        : const Color(0xFF555A63);
     final url = foundryImageUrl(base, t.img);
 
     return Positioned(
@@ -332,16 +377,21 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   : null,
               border: Border.all(
                 color: (selected || dragging) ? AppColors.gold : color,
-                width: (selected || dragging) ? (size * 0.08).clamp(1.5, 4).toDouble() : 1,
+                width: (selected || dragging)
+                    ? (size * 0.08).clamp(1.5, 4).toDouble()
+                    : 1,
               ),
             ),
             alignment: Alignment.center,
             child: url == null && size > 16
-                ? Text(t.name.isNotEmpty ? t.name[0].toUpperCase() : '?',
+                ? Text(
+                    t.name.isNotEmpty ? t.name[0].toUpperCase() : '?',
                     style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: (size * 0.4).clamp(8, 22).toDouble()))
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: (size * 0.4).clamp(8, 22).toDouble(),
+                    ),
+                  )
                 : null,
           ),
         ),
@@ -372,9 +422,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       : Colors.black.withAlpha(160),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                      color: _measure ? AppColors.gold : AppColors.gold.withAlpha(110)),
+                    color: _measure
+                        ? AppColors.gold
+                        : AppColors.gold.withAlpha(110),
+                  ),
                 ),
-                child: const Icon(Icons.straighten, color: AppColors.gold, size: 20),
+                child: const Icon(
+                  Icons.straighten,
+                  color: AppColors.gold,
+                  size: 20,
+                ),
               ),
             ),
           ),
@@ -385,7 +442,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             right: 0,
             child: Center(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.black.withAlpha(160),
                   borderRadius: BorderRadius.circular(20),
@@ -395,10 +455,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   _measA == null
                       ? 'Tocá el punto A'
                       : _measB == null
-                          ? 'Tocá el punto B'
-                          : _measLabel(scene),
+                      ? 'Tocá el punto B'
+                      : _measLabel(scene),
                   style: const TextStyle(
-                      color: AppColors.gold, fontWeight: FontWeight.w600, fontSize: 13),
+                    color: AppColors.gold,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
                 ),
               ),
             ),
@@ -424,15 +487,23 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       alignment: Alignment.center,
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
-                        color: seld ? AppColors.gold.withAlpha(70) : Colors.black.withAlpha(150),
+                        color: seld
+                            ? AppColors.gold.withAlpha(70)
+                            : Colors.black.withAlpha(150),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                            color: seld ? AppColors.gold : AppColors.gold.withAlpha(60)),
+                          color: seld
+                              ? AppColors.gold
+                              : AppColors.gold.withAlpha(60),
+                        ),
                       ),
-                      child: Text(t.name,
-                          style: TextStyle(
-                              fontSize: 12,
-                              color: seld ? AppColors.gold : AppColors.parchment)),
+                      child: Text(
+                        t.name,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: seld ? AppColors.gold : AppColors.parchment,
+                        ),
+                      ),
                     ),
                   );
                 },
@@ -441,42 +512,41 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           ),
         // D-pad flotante (abajo a la derecha)
         if (_selectedId != null && !_measure)
-          Positioned(
-            right: 10,
-            bottom: 48,
-            child: _dpad(),
-          ),
+          Positioned(right: 10, bottom: 48, child: _dpad()),
       ],
     );
   }
 
   Widget _dpad() {
     Widget btn(IconData ic, StepDirection d) => InkWell(
+      borderRadius: BorderRadius.circular(10),
+      onTap: () => _step(d),
+      child: Container(
+        width: 40,
+        height: 40,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.black.withAlpha(160),
           borderRadius: BorderRadius.circular(10),
-          onTap: () => _step(d),
-          child: Container(
-            width: 40,
-            height: 40,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.black.withAlpha(160),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.gold.withAlpha(110)),
-            ),
-            child: Icon(ic, color: AppColors.gold, size: 20),
-          ),
-        );
+          border: Border.all(color: AppColors.gold.withAlpha(110)),
+        ),
+        child: Icon(ic, color: AppColors.gold, size: 20),
+      ),
+    );
     const gap = SizedBox(width: 4, height: 4);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         btn(Icons.keyboard_arrow_up, StepDirection.up),
         gap,
-        Row(mainAxisSize: MainAxisSize.min, children: [
-          btn(Icons.keyboard_arrow_left, StepDirection.left),
-          gap,
-          btn(Icons.keyboard_arrow_right, StepDirection.right),
-        ]),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            btn(Icons.keyboard_arrow_left, StepDirection.left),
+            gap,
+            btn(Icons.keyboard_arrow_right, StepDirection.right),
+          ],
+        ),
         gap,
         btn(Icons.keyboard_arrow_down, StepDirection.down),
       ],
@@ -525,8 +595,11 @@ Path? visibleRegionCanvas(List<FoundryToken> tokens, FoundryScene scene) {
       lit = Path.combine(PathOperation.intersect, los, circle);
     }
     if (lightsU != null) {
-      lit = Path.combine(PathOperation.union, lit,
-          Path.combine(PathOperation.intersect, los, lightsU));
+      lit = Path.combine(
+        PathOperation.union,
+        lit,
+        Path.combine(PathOperation.intersect, los, lightsU),
+      );
     }
     vis = uni(vis, lit);
   }
@@ -572,7 +645,12 @@ class _MeasurePainter extends CustomPainter {
   final Offset? b;
   final FoundryScene scene;
   final double s;
-  _MeasurePainter({required this.a, required this.b, required this.scene, required this.s});
+  _MeasurePainter({
+    required this.a,
+    required this.b,
+    required this.scene,
+    required this.s,
+  });
 
   Offset _toScreen(Offset c) =>
       Offset((c.dx - scene.sceneX) * s, (c.dy - scene.sceneY) * s);

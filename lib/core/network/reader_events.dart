@@ -9,8 +9,7 @@ import 'reader_url_provider.dart';
 /// Stream compartido de eventos del reader por WebSocket
 /// (`{type:'roll'|'message'|'actor'|'connected', data}`). Reconecta solo.
 /// Lo consumen el chat (roll/message) y la hoja del actor (actor).
-final readerEventsProvider =
-    StreamProvider<Map<String, dynamic>>((ref) {
+final readerEventsProvider = StreamProvider<Map<String, dynamic>>((ref) {
   final base = ref.watch(readerUrlProvider);
   final controller = StreamController<Map<String, dynamic>>.broadcast();
 
@@ -33,7 +32,9 @@ final readerEventsProvider =
           try {
             final m = jsonDecode(raw as String) as Map<String, dynamic>;
             controller.add(m);
-          } catch (_) {/* frames no-JSON */}
+          } catch (_) {
+            /* frames no-JSON */
+          }
         },
         onDone: () {
           if (disposed) return;

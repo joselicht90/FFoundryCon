@@ -31,9 +31,7 @@ Future<void> main() async {
 
   runApp(
     ProviderScope(
-      overrides: [
-        prefsProvider.overrideWithValue(prefs),
-      ],
+      overrides: [prefsProvider.overrideWithValue(prefs)],
       child: const FFoundryConApp(),
     ),
   );

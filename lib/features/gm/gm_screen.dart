@@ -49,10 +49,14 @@ class _GmScreenState extends ConsumerState<GmScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(user?.name ?? 'Game Master',
-                          style: cinzel(18, weight: FontWeight.w600, height: 1.1)),
-                      const Text('Game Master',
-                          style: TextStyle(fontSize: 12, color: AppColors.sub)),
+                      Text(
+                        user?.name ?? 'Game Master',
+                        style: cinzel(18, weight: FontWeight.w600, height: 1.1),
+                      ),
+                      const Text(
+                        'Game Master',
+                        style: TextStyle(fontSize: 12, color: AppColors.sub),
+                      ),
                     ],
                   ),
                 ),

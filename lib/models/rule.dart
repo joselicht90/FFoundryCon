@@ -10,8 +10,8 @@ class Rule {
       Rule(id: id, title: title ?? this.title, body: body ?? this.body);
 
   factory Rule.fromJson(Map<String, dynamic> j) => Rule(
-        id: j['id'] as String? ?? '',
-        title: j['title'] as String? ?? '',
-        body: j['body'] as String? ?? '',
-      );
+    id: j['id'] as String? ?? '',
+    title: j['title'] as String? ?? '',
+    body: j['body'] as String? ?? '',
+  );
 }

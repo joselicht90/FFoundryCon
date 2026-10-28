@@ -62,60 +62,61 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-              const Icon(Icons.shield_moon, size: 64, color: AppColors.gold),
-              const SizedBox(height: 18),
-              const Text(
-                'FOUNDRY',
-                style: TextStyle(
+                const Icon(Icons.shield_moon, size: 64, color: AppColors.gold),
+                const SizedBox(height: 18),
+                const Text(
+                  'FOUNDRY',
+                  style: TextStyle(
                     fontSize: 12,
                     letterSpacing: 3,
                     color: AppColors.goldDim,
-                    fontWeight: FontWeight.w600),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 3),
-              Text(
-                'FFoundry',
-                style: cinzel(28, color: AppColors.name),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'Companion para Foundry VTT',
-                style: TextStyle(color: AppColors.label),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 44),
-              TextField(
-                controller: _controller,
-                decoration: const InputDecoration(
-                  labelText: 'Reader URL',
-                  hintText: 'https://reader.r4spi.com',
-                  prefixIcon: Icon(Icons.link),
-                  border: OutlineInputBorder(),
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                keyboardType: TextInputType.url,
-                onSubmitted: (_) => _connect(),
-              ),
-              if (error != null) ...[
-                const SizedBox(height: 12),
-                Text(error, style: const TextStyle(color: Colors.red)),
-              ],
-              const SizedBox(height: 24),
-              FilledButton.icon(
-                onPressed: loading ? null : _connect,
-                icon: loading
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.bolt),
-                label: Text(loading ? 'Conectando...' : 'Conectar'),
-              ),
+                const SizedBox(height: 3),
+                Text(
+                  'FFoundry',
+                  style: cinzel(28, color: AppColors.name),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Companion para Foundry VTT',
+                  style: TextStyle(color: AppColors.label),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 44),
+                TextField(
+                  controller: _controller,
+                  decoration: const InputDecoration(
+                    labelText: 'Reader URL',
+                    hintText: 'https://reader.r4spi.com',
+                    prefixIcon: Icon(Icons.link),
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.url,
+                  onSubmitted: (_) => _connect(),
+                ),
+                if (error != null) ...[
+                  const SizedBox(height: 12),
+                  Text(error, style: const TextStyle(color: Colors.red)),
+                ],
+                const SizedBox(height: 24),
+                FilledButton.icon(
+                  onPressed: loading ? null : _connect,
+                  icon: loading
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Icons.bolt),
+                  label: Text(loading ? 'Conectando...' : 'Conectar'),
+                ),
               ],
             ),
           ),

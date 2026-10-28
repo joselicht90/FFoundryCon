@@ -19,7 +19,8 @@ class RulesScreen extends ConsumerWidget {
           IconButton(
             tooltip: 'Refrescar',
             icon: const Icon(Icons.refresh),
-            onPressed: () => ref.read(rulesControllerProvider.notifier).refresh(),
+            onPressed: () =>
+                ref.read(rulesControllerProvider.notifier).refresh(),
           ),
         ],
       ),
@@ -32,14 +33,20 @@ class RulesScreen extends ConsumerWidget {
       ),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => _Error(error: '$e', onRetry: () => ref.read(rulesControllerProvider.notifier).refresh()),
+        error: (e, _) => _Error(
+          error: '$e',
+          onRetry: () => ref.read(rulesControllerProvider.notifier).refresh(),
+        ),
         data: (rules) {
           if (rules.isEmpty) {
             return const Center(
               child: Padding(
                 padding: EdgeInsets.all(28),
-                child: Text('Todavía no hay reglas.\nTocá "Nueva regla" para agregar una.',
-                    textAlign: TextAlign.center, style: TextStyle(color: AppColors.label)),
+                child: Text(
+                  'Todavía no hay reglas.\nTocá "Nueva regla" para agregar una.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: AppColors.label),
+                ),
               ),
             );
           }
@@ -68,23 +75,35 @@ class RulesScreen extends ConsumerWidget {
         ),
         child: ConstrainedBox(
           constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(ctx).size.height * 0.75, maxWidth: 520),
+            maxHeight: MediaQuery.of(ctx).size.height * 0.75,
+            maxWidth: 520,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(18, 16, 18, 6),
-                child: Text(rule.title.isEmpty ? '(sin título)' : rule.title,
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.name)),
+                child: Text(
+                  rule.title.isEmpty ? '(sin título)' : rule.title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.name,
+                  ),
+                ),
               ),
               Flexible(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(18, 4, 18, 12),
-                  child: Text(rule.body.trim().isEmpty ? 'Sin contenido.' : rule.body,
-                      style: const TextStyle(
-                          fontSize: 14, height: 1.5, color: AppColors.listText)),
+                  child: Text(
+                    rule.body.trim().isEmpty ? 'Sin contenido.' : rule.body,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      height: 1.5,
+                      color: AppColors.listText,
+                    ),
+                  ),
                 ),
               ),
               const Divider(height: 1, color: Color(0x14FFFFFF)),
@@ -94,8 +113,15 @@ class RulesScreen extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton.icon(
-                      icon: const Icon(Icons.delete_outline, size: 18, color: AppColors.red),
-                      label: const Text('Eliminar', style: TextStyle(color: AppColors.red)),
+                      icon: const Icon(
+                        Icons.delete_outline,
+                        size: 18,
+                        color: AppColors.red,
+                      ),
+                      label: const Text(
+                        'Eliminar',
+                        style: TextStyle(color: AppColors.red),
+                      ),
                       onPressed: () async {
                         Navigator.pop(ctx);
                         await _confirmDelete(context, ref, rule);
@@ -109,7 +135,10 @@ class RulesScreen extends ConsumerWidget {
                         _edit(context, ref, rule);
                       },
                     ),
-                    TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cerrar')),
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('Cerrar'),
+                    ),
                   ],
                 ),
               ),
@@ -162,11 +191,14 @@ class RulesScreen extends ConsumerWidget {
           ),
           actions: [
             TextButton(
-                onPressed: busy ? null : () => Navigator.pop(ctx),
-                child: const Text('Cancelar')),
+              onPressed: busy ? null : () => Navigator.pop(ctx),
+              child: const Text('Cancelar'),
+            ),
             FilledButton(
               style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.gold, foregroundColor: Colors.black),
+                backgroundColor: AppColors.gold,
+                foregroundColor: Colors.black,
+              ),
               onPressed: busy
                   ? null
                   : () async {
@@ -174,8 +206,13 @@ class RulesScreen extends ConsumerWidget {
                       if (title.isEmpty) return;
                       setS(() => busy = true);
                       try {
-                        await ref.read(rulesControllerProvider.notifier).save(
-                            id: rule?.id, title: title, body: bodyC.text.trim());
+                        await ref
+                            .read(rulesControllerProvider.notifier)
+                            .save(
+                              id: rule?.id,
+                              title: title,
+                              body: bodyC.text.trim(),
+                            );
                         if (ctx.mounted) Navigator.pop(ctx);
                       } catch (e) {
                         setS(() => busy = false);
@@ -194,7 +231,11 @@ class RulesScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _confirmDelete(BuildContext context, WidgetRef ref, Rule rule) async {
+  Future<void> _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    Rule rule,
+  ) async {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -202,7 +243,10 @@ class RulesScreen extends ConsumerWidget {
         title: const Text('Eliminar regla'),
         content: Text('¿Eliminar "${rule.title}"? No se puede deshacer.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppColors.red),
             onPressed: () => Navigator.pop(ctx, true),
@@ -216,8 +260,9 @@ class RulesScreen extends ConsumerWidget {
         await ref.read(rulesControllerProvider.notifier).delete(rule.id);
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text('No se pudo eliminar: $e')));
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('No se pudo eliminar: $e')));
         }
       }
     }
@@ -243,28 +288,46 @@ class _RuleCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
             child: Row(
               children: [
-                const Icon(Icons.menu_book_outlined, size: 20, color: AppColors.gold),
+                const Icon(
+                  Icons.menu_book_outlined,
+                  size: 20,
+                  color: AppColors.gold,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(rule.title.isEmpty ? '(sin título)' : rule.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.listText)),
+                      Text(
+                        rule.title.isEmpty ? '(sin título)' : rule.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.listText,
+                        ),
+                      ),
                       if (preview.isNotEmpty) ...[
                         const SizedBox(height: 3),
-                        Text(preview,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 12, color: AppColors.label)),
+                        Text(
+                          preview,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.label,
+                          ),
+                        ),
                       ],
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right, size: 18, color: AppColors.muted),
+                const Icon(
+                  Icons.chevron_right,
+                  size: 18,
+                  color: AppColors.muted,
+                ),
               ],
             ),
           ),
@@ -287,8 +350,11 @@ class _Error extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('No se pudieron cargar las reglas.\n$error',
-                textAlign: TextAlign.center, style: const TextStyle(color: AppColors.label)),
+            Text(
+              'No se pudieron cargar las reglas.\n$error',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: AppColors.label),
+            ),
             const SizedBox(height: 12),
             FilledButton(onPressed: onRetry, child: const Text('Reintentar')),
           ],

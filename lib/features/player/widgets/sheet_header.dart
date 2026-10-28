@@ -19,16 +19,12 @@ class SheetHeader extends StatelessWidget {
             children: [
               Text(
                 actor.name,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleLarge
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 2),
-              Text(
-                actor.classLine,
-                style: const TextStyle(color: Colors.grey),
-              ),
+              Text(actor.classLine, style: const TextStyle(color: Colors.grey)),
               if (actor.level != null)
                 Text(
                   'Nivel ${actor.level}'

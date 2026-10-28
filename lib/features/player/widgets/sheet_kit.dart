@@ -84,7 +84,11 @@ class _SwordPainter extends CustomPainter {
 class SheetSearchField extends StatelessWidget {
   final String hint;
   final ValueChanged<String> onChanged;
-  const SheetSearchField({super.key, required this.hint, required this.onChanged});
+  const SheetSearchField({
+    super.key,
+    required this.hint,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +103,10 @@ class SheetSearchField extends StatelessWidget {
         prefixIcon: const Icon(Icons.search, size: 18, color: AppColors.label),
         filled: true,
         fillColor: AppColors.card,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 11,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(11),
           borderSide: BorderSide(color: AppColors.gold.withAlpha(46)),
@@ -157,10 +164,12 @@ class SectionHeader extends StatelessWidget {
   final String label;
   final String? trailing;
   final EdgeInsetsGeometry margin;
-  const SectionHeader(this.label,
-      {super.key,
-      this.trailing,
-      this.margin = const EdgeInsets.fromLTRB(2, 18, 2, 9)});
+  const SectionHeader(
+    this.label, {
+    super.key,
+    this.trailing,
+    this.margin = const EdgeInsets.fromLTRB(2, 18, 2, 9),
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -178,11 +187,15 @@ class SectionHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Expanded(child: Container(height: 1, color: AppColors.gold.withAlpha(40))),
+          Expanded(
+            child: Container(height: 1, color: AppColors.gold.withAlpha(40)),
+          ),
           if (trailing != null) ...[
             const SizedBox(width: 8),
-            Text(trailing!,
-                style: const TextStyle(fontSize: 10, color: AppColors.label)),
+            Text(
+              trailing!,
+              style: const TextStyle(fontSize: 10, color: AppColors.label),
+            ),
           ],
         ],
       ),
@@ -252,11 +265,14 @@ class EditStepper extends StatelessWidget {
         _btn('−', onDec),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Text(value,
-              style: TextStyle(
-                  fontSize: valueSize,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.name)),
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: valueSize,
+              fontWeight: FontWeight.w700,
+              color: AppColors.name,
+            ),
+          ),
         ),
         _btn('+', onInc),
       ],
@@ -264,20 +280,22 @@ class EditStepper extends StatelessWidget {
   }
 
   Widget _btn(String glyph, VoidCallback onTap) => InkWell(
+    borderRadius: BorderRadius.circular(6),
+    onTap: onTap,
+    child: Container(
+      width: 24,
+      height: 24,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: AppColors.panelAlt,
         borderRadius: BorderRadius.circular(6),
-        onTap: onTap,
-        child: Container(
-          width: 24,
-          height: 24,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: AppColors.panelAlt,
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Text(glyph,
-              style: const TextStyle(color: AppColors.gold, fontSize: 17)),
-        ),
-      );
+      ),
+      child: Text(
+        glyph,
+        style: const TextStyle(color: AppColors.gold, fontSize: 17),
+      ),
+    ),
+  );
 }
 
 /// Label chiquito en mayúsculas con tracking (reutilizable).
@@ -288,12 +306,12 @@ class MicroLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Text(
-        text.toUpperCase(),
-        style: TextStyle(
-          fontSize: 9,
-          letterSpacing: 1.2,
-          color: color,
-          fontWeight: FontWeight.w600,
-        ),
-      );
+    text.toUpperCase(),
+    style: TextStyle(
+      fontSize: 9,
+      letterSpacing: 1.2,
+      color: color,
+      fontWeight: FontWeight.w600,
+    ),
+  );
 }

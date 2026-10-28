@@ -88,7 +88,9 @@ class _CastResultSheetState extends ConsumerState<_CastResultSheet> {
       }
     });
     try {
-      await ref.read(actorControllerProvider.notifier).use(
+      await ref
+          .read(actorControllerProvider.notifier)
+          .use(
             widget.itemId,
             action: action,
             targetIds: widget.targetIds,
@@ -97,8 +99,9 @@ class _CastResultSheetState extends ConsumerState<_CastResultSheet> {
           );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Error: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) {
@@ -119,7 +122,9 @@ class _CastResultSheetState extends ConsumerState<_CastResultSheet> {
     if (_authorName != null && m.author != _authorName) return false;
     final flavor = m.flavor;
     if (flavor == null) return false;
-    return flavor == 'Ataque' || flavor == 'Daño' || flavor.startsWith(widget.name);
+    return flavor == 'Ataque' ||
+        flavor == 'Daño' ||
+        flavor.startsWith(widget.name);
   }
 
   @override
@@ -137,11 +142,14 @@ class _CastResultSheetState extends ConsumerState<_CastResultSheet> {
             Row(
               children: [
                 Expanded(
-                  child: Text(widget.name,
-                      style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.name)),
+                  child: Text(
+                    widget.name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.name,
+                    ),
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),
@@ -156,8 +164,12 @@ class _CastResultSheetState extends ConsumerState<_CastResultSheet> {
                   Expanded(
                     child: FilledButton(
                       style: FilledButton.styleFrom(
-                          backgroundColor: AppColors.gold, foregroundColor: Colors.black),
-                      onPressed: _attackBusy ? null : () => _fire('attack', _attackBusy),
+                        backgroundColor: AppColors.gold,
+                        foregroundColor: Colors.black,
+                      ),
+                      onPressed: _attackBusy
+                          ? null
+                          : () => _fire('attack', _attackBusy),
                       child: Text(_attackBusy ? '…' : 'ATAQUE'),
                     ),
                   ),
@@ -166,7 +178,9 @@ class _CastResultSheetState extends ConsumerState<_CastResultSheet> {
                 if (widget.hasDamage)
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: _damageBusy ? null : () => _fire('damage', _damageBusy),
+                      onPressed: _damageBusy
+                          ? null
+                          : () => _fire('damage', _damageBusy),
                       child: Text(_damageBusy ? '…' : 'DAÑO'),
                     ),
                   ),
@@ -174,12 +188,16 @@ class _CastResultSheetState extends ConsumerState<_CastResultSheet> {
             ),
             const SizedBox(height: 12),
             ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.4),
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.4,
+              ),
               child: rolls.isEmpty
                   ? const Padding(
                       padding: EdgeInsets.symmetric(vertical: 16),
-                      child: Text('Sin tiradas todavía',
-                          style: TextStyle(fontSize: 12, color: AppColors.label)),
+                      child: Text(
+                        'Sin tiradas todavía',
+                        style: TextStyle(fontSize: 12, color: AppColors.label),
+                      ),
                     )
                   : ListView.separated(
                       shrinkWrap: true,

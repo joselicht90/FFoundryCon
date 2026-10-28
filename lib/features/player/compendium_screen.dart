@@ -61,12 +61,7 @@ class _CompendiumScreenState extends ConsumerState<CompendiumScreen> {
             ],
           ),
         ),
-        body: const TabBarView(
-          children: [
-            _SearchTab(),
-            _PacksTab(),
-          ],
-        ),
+        body: const TabBarView(children: [_SearchTab(), _PacksTab()]),
       ),
     );
   }
@@ -171,17 +166,18 @@ class _SearchTabState extends ConsumerState<_SearchTab>
           child: _loading
               ? const Center(child: CircularProgressIndicator())
               : _error != null
-                  ? _CompendiumError(error: _error!, onRetry: _search)
-                  : results == null
-                      ? const _CompendiumHint(
-                          'Escribí un nombre o elegí un filtro para buscar en el compendio.')
-                      : results.isEmpty
-                          ? const _CompendiumHint('Sin resultados.')
-                          : ListView.builder(
-                              padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
-                              itemCount: results.length,
-                              itemBuilder: (_, i) => _EntryRow(entry: results[i]),
-                            ),
+              ? _CompendiumError(error: _error!, onRetry: _search)
+              : results == null
+              ? const _CompendiumHint(
+                  'Escribí un nombre o elegí un filtro para buscar en el compendio.',
+                )
+              : results.isEmpty
+              ? const _CompendiumHint('Sin resultados.')
+              : ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
+                  itemCount: results.length,
+                  itemBuilder: (_, i) => _EntryRow(entry: results[i]),
+                ),
         ),
       ],
     );
@@ -243,17 +239,31 @@ class _PacksTabState extends ConsumerState<_PacksTab>
                 padding: EdgeInsets.zero,
                 child: ListTile(
                   leading: Icon(
-                    p.isItem ? Icons.inventory_2_outlined : Icons.menu_book_outlined,
+                    p.isItem
+                        ? Icons.inventory_2_outlined
+                        : Icons.menu_book_outlined,
                     color: AppColors.gold,
                   ),
-                  title: Text(p.label,
-                      style: const TextStyle(color: AppColors.listText)),
-                  subtitle: Text(p.type == 'Item' ? 'Objetos' : 'Reglas / Diario',
-                      style: const TextStyle(color: AppColors.label, fontSize: 11)),
-                  trailing: const Icon(Icons.chevron_right, color: AppColors.muted),
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => _PackIndexScreen(pack: p),
-                  )),
+                  title: Text(
+                    p.label,
+                    style: const TextStyle(color: AppColors.listText),
+                  ),
+                  subtitle: Text(
+                    p.type == 'Item' ? 'Objetos' : 'Reglas / Diario',
+                    style: const TextStyle(
+                      color: AppColors.label,
+                      fontSize: 11,
+                    ),
+                  ),
+                  trailing: const Icon(
+                    Icons.chevron_right,
+                    color: AppColors.muted,
+                  ),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => _PackIndexScreen(pack: p),
+                    ),
+                  ),
                 ),
               ),
             );
@@ -279,7 +289,9 @@ class _PackIndexScreenState extends ConsumerState<_PackIndexScreen> {
   @override
   void initState() {
     super.initState();
-    _future = ref.read(foundryRepositoryProvider).compendiumIndex(widget.pack.id);
+    _future = ref
+        .read(foundryRepositoryProvider)
+        .compendiumIndex(widget.pack.id);
   }
 
   @override
@@ -295,12 +307,13 @@ class _PackIndexScreenState extends ConsumerState<_PackIndexScreen> {
           }
           if (snap.hasError) {
             return _CompendiumError(
-                error: '${snap.error}',
-                onRetry: () => setState(() {
-                      _future = ref
-                          .read(foundryRepositoryProvider)
-                          .compendiumIndex(widget.pack.id);
-                    }));
+              error: '${snap.error}',
+              onRetry: () => setState(() {
+                _future = ref
+                    .read(foundryRepositoryProvider)
+                    .compendiumIndex(widget.pack.id);
+              }),
+            );
           }
           final all = snap.data ?? const <CompendiumEntry>[];
           final entries = q.isEmpty
@@ -322,7 +335,9 @@ class _PackIndexScreenState extends ConsumerState<_PackIndexScreen> {
                         padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
                         itemCount: entries.length,
                         itemBuilder: (_, i) => _EntryRow(
-                            entry: entries[i], journal: !widget.pack.isItem),
+                          entry: entries[i],
+                          journal: !widget.pack.isItem,
+                        ),
                       ),
               ),
             ],
@@ -367,17 +382,25 @@ class _EntryRow extends ConsumerWidget {
                   : null,
             ),
             child: url == null
-                ? const Icon(Icons.auto_awesome, size: 18, color: AppColors.muted)
+                ? const Icon(
+                    Icons.auto_awesome,
+                    size: 18,
+                    color: AppColors.muted,
+                  )
                 : null,
           ),
-          title:
-              Text(entry.name, style: const TextStyle(color: AppColors.listText)),
+          title: Text(
+            entry.name,
+            style: const TextStyle(color: AppColors.listText),
+          ),
           subtitle: sub.isEmpty
               ? null
-              : Text(sub,
+              : Text(
+                  sub,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: AppColors.label, fontSize: 11)),
+                  style: const TextStyle(color: AppColors.label, fontSize: 11),
+                ),
           trailing: const Icon(Icons.chevron_right, color: AppColors.muted),
           onTap: () => _showEntryDetail(context, ref, entry, journal: journal),
         ),
@@ -410,8 +433,9 @@ Future<void> _showEntryDetail(
   if (!context.mounted) return;
   Navigator.of(context).pop(); // cierra el spinner
   if (detail == null) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('No se pudo cargar: $err')));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('No se pudo cargar: $err')));
     return;
   }
 
@@ -427,7 +451,9 @@ Future<void> _showEntryDetail(
       ),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(ctx).size.height * 0.75, maxWidth: 460),
+          maxHeight: MediaQuery.of(ctx).size.height * 0.75,
+          maxWidth: 460,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -437,15 +463,23 @@ Future<void> _showEntryDetail(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(d.name,
-                      style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.name)),
+                  Text(
+                    d.name,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.name,
+                    ),
+                  ),
                   if (d.type != null) ...[
                     const SizedBox(height: 2),
-                    Text(_itemTypeLabels[d.type] ?? d.type!,
-                        style: const TextStyle(fontSize: 11, color: AppColors.gold)),
+                    Text(
+                      _itemTypeLabels[d.type] ?? d.type!,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.gold,
+                      ),
+                    ),
                   ],
                 ],
               ),
@@ -454,11 +488,15 @@ Future<void> _showEntryDetail(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(18, 10, 18, 12),
                 child: Text(
-                    d.description.trim().isEmpty
-                        ? 'Sin descripción.'
-                        : d.description,
-                    style: const TextStyle(
-                        fontSize: 13, height: 1.45, color: AppColors.listText)),
+                  d.description.trim().isEmpty
+                      ? 'Sin descripción.'
+                      : d.description,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    height: 1.45,
+                    color: AppColors.listText,
+                  ),
+                ),
               ),
             ),
             const Divider(height: 1, color: Color(0x14FFFFFF)),
@@ -468,10 +506,10 @@ Future<void> _showEntryDetail(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      child: const Text('Cerrar')),
-                  if (canAdd)
-                    _AddButton(entry: entry, name: d.name),
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text('Cerrar'),
+                  ),
+                  if (canAdd) _AddButton(entry: entry, name: d.name),
                 ],
               ),
             ),
@@ -512,8 +550,9 @@ class _AddButtonState extends ConsumerState<_AddButton> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _busy = false);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('No se pudo agregar: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('No se pudo agregar: $e')));
     }
   }
 
@@ -522,12 +561,18 @@ class _AddButtonState extends ConsumerState<_AddButton> {
     final actor = ref.watch(actorControllerProvider).valueOrNull;
     return FilledButton.icon(
       style: FilledButton.styleFrom(
-          backgroundColor: AppColors.gold, foregroundColor: Colors.black),
+        backgroundColor: AppColors.gold,
+        foregroundColor: Colors.black,
+      ),
       icon: _busy
           ? const SizedBox(
               width: 16,
               height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.black,
+              ),
+            )
           : const Icon(Icons.add, size: 16),
       onPressed: (actor == null || _busy) ? null : _add,
       label: const Text('Agregar'),
@@ -544,9 +589,11 @@ class _CompendiumHint extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(28),
-        child: Text(text,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.label)),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: AppColors.label),
+        ),
       ),
     );
   }
@@ -567,13 +614,17 @@ class _CompendiumError extends StatelessWidget {
           children: [
             const Icon(Icons.cloud_off, color: AppColors.orange, size: 36),
             const SizedBox(height: 10),
-            const Text('Requiere Foundry abierto (GM online)',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: AppColors.label)),
+            const Text(
+              'Requiere Foundry abierto (GM online)',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.label),
+            ),
             const SizedBox(height: 6),
-            Text(error,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: AppColors.muted, fontSize: 11)),
+            Text(
+              error,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: AppColors.muted, fontSize: 11),
+            ),
             const SizedBox(height: 12),
             FilledButton(onPressed: onRetry, child: const Text('Reintentar')),
           ],

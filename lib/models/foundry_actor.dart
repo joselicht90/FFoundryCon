@@ -43,6 +43,7 @@ class ActorSkill {
   final int total;
   @JsonKey(defaultValue: 0)
   final int passive;
+
   /// 0 = ninguna, 0.5 = media, 1 = competente, 2 = experticia.
   @JsonKey(defaultValue: 0)
   final num proficient;
@@ -378,6 +379,7 @@ class FoundryActor {
   final List<ActorSpell> spells;
   @JsonKey(defaultValue: <SpellSlot>[])
   final List<SpellSlot> spellSlots;
+
   /// Inventario compartido de la party (null si no pertenece a ninguna).
   final ActorParty? party;
   @JsonKey(defaultValue: <ActorEffect>[])

@@ -22,10 +22,9 @@ class TokenController extends AsyncNotifier<List<FoundryToken>> {
     String tokenId,
     StepDirection direction, {
     int spaces = 1,
-  }) =>
-      ref
-          .read(foundryRepositoryProvider)
-          .stepToken(tokenId, direction, spaces: spaces);
+  }) => ref
+      .read(foundryRepositoryProvider)
+      .stepToken(tokenId, direction, spaces: spaces);
 
   Future<void> setTargets(List<String> tokenIds) =>
       ref.read(foundryRepositoryProvider).setTargets(tokenIds);
@@ -36,5 +35,5 @@ class TokenController extends AsyncNotifier<List<FoundryToken>> {
 
 final tokenControllerProvider =
     AsyncNotifierProvider<TokenController, List<FoundryToken>>(
-  TokenController.new,
-);
+      TokenController.new,
+    );

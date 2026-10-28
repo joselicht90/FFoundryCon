@@ -46,13 +46,13 @@ class RollCardView extends StatelessWidget {
     final border = crit
         ? AppColors.green
         : fail
-            ? AppColors.red
-            : AppColors.gold.withAlpha(64);
+        ? AppColors.red
+        : AppColors.gold.withAlpha(64);
     final totalColor = crit
         ? AppColors.green
         : fail
-            ? AppColors.red
-            : AppColors.gold;
+        ? AppColors.red
+        : AppColors.gold;
 
     return Container(
       decoration: BoxDecoration(
@@ -73,25 +73,43 @@ class RollCardView extends StatelessWidget {
               child: Row(
                 children: [
                   Container(
-                      width: 7,
-                      height: 7,
-                      decoration: BoxDecoration(shape: BoxShape.circle, color: authorC)),
+                    width: 7,
+                    height: 7,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: authorC,
+                    ),
+                  ),
                   const SizedBox(width: 7),
                   Expanded(
-                    child: Text(author!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            fontSize: 12.5, fontWeight: FontWeight.w600, color: authorC)),
+                    child: Text(
+                      author!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                        color: authorC,
+                      ),
+                    ),
                   ),
                   if (isPrivate == true)
                     const Padding(
                       padding: EdgeInsets.only(right: 5),
-                      child: Icon(Icons.lock, size: 11, color: AppColors.orange),
+                      child: Icon(
+                        Icons.lock,
+                        size: 11,
+                        color: AppColors.orange,
+                      ),
                     ),
                   if (time != null)
-                    Text(time!,
-                        style: const TextStyle(fontSize: 10, color: Color(0xFF6F6A60))),
+                    Text(
+                      time!,
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: Color(0xFF6F6A60),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -107,26 +125,36 @@ class RollCardView extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (flavor != null)
-                            Text(flavor!,
-                                style: const TextStyle(
-                                    fontSize: 13.5,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.name)),
+                            Text(
+                              flavor!,
+                              style: const TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.name,
+                              ),
+                            ),
                           if (formula != null) ...[
                             const SizedBox(height: 4),
                             Container(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppColors.panelAlt,
                                 borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: AppColors.gold.withAlpha(46)),
+                                border: Border.all(
+                                  color: AppColors.gold.withAlpha(46),
+                                ),
                               ),
-                              child: Text(formula!,
-                                  style: const TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      color: Color(0xFFA69F8F))),
+                              child: Text(
+                                formula!,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFFA69F8F),
+                                ),
+                              ),
                             ),
                           ],
                         ],
@@ -145,7 +173,10 @@ class RollCardView extends StatelessWidget {
                           colors: [Color(0xFF2E3138), Color(0xFF14161A)],
                         ),
                       ),
-                      child: Text('${total ?? '?'}', style: cinzel(24, color: totalColor)),
+                      child: Text(
+                        '${total ?? '?'}',
+                        style: cinzel(24, color: totalColor),
+                      ),
                     ),
                   ],
                 ),
@@ -159,9 +190,14 @@ class RollCardView extends StatelessWidget {
                 ],
                 if (crit || fail) ...[
                   const SizedBox(height: 8),
-                  Text(crit ? '¡CRÍTICO!' : 'PIFIA',
-                      style: TextStyle(
-                          fontSize: 12, fontWeight: FontWeight.w700, color: totalColor)),
+                  Text(
+                    crit ? '¡CRÍTICO!' : 'PIFIA',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: totalColor,
+                    ),
+                  ),
                 ],
               ],
             ),
@@ -177,8 +213,8 @@ class RollCardView extends StatelessWidget {
     final c = crit
         ? AppColors.green
         : fail
-            ? AppColors.red
-            : const Color(0xFFA69F8F);
+        ? AppColors.red
+        : const Color(0xFFA69F8F);
     return Container(
       constraints: const BoxConstraints(minWidth: 26),
       height: 26,
@@ -189,8 +225,10 @@ class RollCardView extends StatelessWidget {
         borderRadius: BorderRadius.circular(7),
         border: Border.all(color: c.withAlpha(110)),
       ),
-      child: Text('$v',
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: c)),
+      child: Text(
+        '$v',
+        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: c),
+      ),
     );
   }
 }

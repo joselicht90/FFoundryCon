@@ -24,7 +24,9 @@ class _ApplyDamageBarState extends ConsumerState<ApplyDamageBar> {
     setState(() => _busy = true);
     final a = widget.apply;
     try {
-      await ref.read(foundryRepositoryProvider).applyDamage(
+      await ref
+          .read(foundryRepositoryProvider)
+          .applyDamage(
             a.targets.map((t) => t.tokenId).toList(),
             damages: a.damages.isNotEmpty ? a.damages : null,
             amount: a.total,
@@ -37,8 +39,9 @@ class _ApplyDamageBarState extends ConsumerState<ApplyDamageBar> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('No se pudo aplicar: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('No se pudo aplicar: $e')));
       }
     }
     if (mounted) setState(() => _busy = false);
@@ -63,16 +66,25 @@ class _ApplyDamageBarState extends ConsumerState<ApplyDamageBar> {
               const Icon(Icons.bloodtype, size: 15, color: AppColors.red),
               const SizedBox(width: 6),
               Expanded(
-                child: Text('Aplicar ${a.total} a: $names',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 12, color: AppColors.listText)),
+                child: Text(
+                  'Aplicar ${a.total} a: $names',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.listText,
+                  ),
+                ),
               ),
               if (_busy)
                 const SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.red)),
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.red,
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 7),
@@ -103,8 +115,10 @@ class _ApplyDamageBarState extends ConsumerState<ApplyDamageBar> {
           borderRadius: BorderRadius.circular(9),
           border: Border.all(color: c.withAlpha(120)),
         ),
-        child: Text(label,
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: c)),
+        child: Text(
+          label,
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: c),
+        ),
       ),
     );
   }

@@ -38,9 +38,13 @@ class _TokenControlScreenState extends ConsumerState<TokenControlScreen> {
   }
 
   Future<void> _toggleTarget(String id) async {
-    setState(() => _targets.contains(id) ? _targets.remove(id) : _targets.add(id));
+    setState(
+      () => _targets.contains(id) ? _targets.remove(id) : _targets.add(id),
+    );
     try {
-      await ref.read(tokenControllerProvider.notifier).setTargets(_targets.toList());
+      await ref
+          .read(tokenControllerProvider.notifier)
+          .setTargets(_targets.toList());
     } catch (e) {
       if (mounted) sheetToast(context, 'No se pudo fijar objetivos: $e');
     }
@@ -64,24 +68,34 @@ class _TokenControlScreenState extends ConsumerState<TokenControlScreen> {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(32),
-          child: Text('Control de tokens deshabilitado.\nRequiere Foundry abierto.',
-              textAlign: TextAlign.center, style: TextStyle(color: AppColors.label)),
+          child: Text(
+            'Control de tokens deshabilitado.\nRequiere Foundry abierto.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColors.label),
+          ),
         ),
       );
     }
 
     return tokensAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) =>
-          Center(child: Text('$e', style: const TextStyle(color: AppColors.red))),
+      error: (e, _) => Center(
+        child: Text('$e', style: const TextStyle(color: AppColors.red)),
+      ),
       data: (tokens) {
-        final visible =
-            isGM ? tokens : tokens.where((t) => !t.hidden && !t.isSecret).toList();
+        final visible = isGM
+            ? tokens
+            : tokens.where((t) => !t.hidden && !t.isSecret).toList();
         if (_selectedId == null || !visible.any((t) => t.id == _selectedId)) {
-          final mine = visible.where((t) => _canControl(t, isGM, user?.id)).toList();
+          final mine = visible
+              .where((t) => _canControl(t, isGM, user?.id))
+              .toList();
           if (mine.isNotEmpty) {
             _selectedId = mine
-                .firstWhere((t) => t.actorId == actor?.id, orElse: () => mine.first)
+                .firstWhere(
+                  (t) => t.actorId == actor?.id,
+                  orElse: () => mine.first,
+                )
                 .id;
           }
         }
@@ -101,9 +115,9 @@ class _TokenControlScreenState extends ConsumerState<TokenControlScreen> {
                 side: BorderSide(color: AppColors.gold.withAlpha(110)),
                 minimumSize: const Size.fromHeight(44),
               ),
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const MapScreen()),
-              ),
+              onPressed: () => Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const MapScreen())),
             ),
             const SizedBox(height: 14),
             Row(
@@ -113,22 +127,28 @@ class _TokenControlScreenState extends ConsumerState<TokenControlScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const MicroLabel('Controlando'),
-                    Text(selName ?? '—',
-                        style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.name)),
+                    Text(
+                      selName ?? '—',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.name,
+                      ),
+                    ),
                   ],
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     const MicroLabel('Objetivos'),
-                    Text('${_targets.length}',
-                        style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.target)),
+                    Text(
+                      '${_targets.length}',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.target,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -140,8 +160,9 @@ class _TokenControlScreenState extends ConsumerState<TokenControlScreen> {
               spacing: 10,
               runSpacing: 10,
               alignment: WrapAlignment.center,
-              children:
-                  visible.map((t) => _tokenBadge(t, isGM, user?.id, actor?.id)).toList(),
+              children: visible
+                  .map((t) => _tokenBadge(t, isGM, user?.id, actor?.id))
+                  .toList(),
             ),
             const SizedBox(height: 20),
             Row(
@@ -152,7 +173,11 @@ class _TokenControlScreenState extends ConsumerState<TokenControlScreen> {
                 Expanded(
                   child: Column(
                     children: [
-                      _action('Limpiar objetivos', AppColors.target, _clearTargets),
+                      _action(
+                        'Limpiar objetivos',
+                        AppColors.target,
+                        _clearTargets,
+                      ),
                       const SizedBox(height: 8),
                       _action('Controlar mi token', AppColors.tokenYou, () {
                         for (final t in visible) {
@@ -169,9 +194,10 @@ class _TokenControlScreenState extends ConsumerState<TokenControlScreen> {
             ),
             const SizedBox(height: 12),
             const Text(
-                'Tocá un aliado para controlarlo · tocá enemigos para fijar objetivo',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 11, color: Color(0xFF6F6A60))),
+              'Tocá un aliado para controlarlo · tocá enemigos para fijar objetivo',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 11, color: Color(0xFF6F6A60)),
+            ),
           ],
         );
       },
@@ -187,7 +213,12 @@ class _TokenControlScreenState extends ConsumerState<TokenControlScreen> {
     return const Color(0xFF555A63);
   }
 
-  Widget _tokenBadge(FoundryToken t, bool isGM, String? userId, String? actorId) {
+  Widget _tokenBadge(
+    FoundryToken t,
+    bool isGM,
+    String? userId,
+    String? actorId,
+  ) {
     final color = _tokenColor(t, userId, actorId);
     final controllable = _canControl(t, isGM, userId);
     final isControlled = t.id == _selectedId;
@@ -217,8 +248,14 @@ class _TokenControlScreenState extends ConsumerState<TokenControlScreen> {
                         ? Border.all(color: AppColors.gold, width: 2.5)
                         : null,
                   ),
-                  child: Text(initial,
-                      style: cinzel(18, color: Colors.white, weight: FontWeight.w700)),
+                  child: Text(
+                    initial,
+                    style: cinzel(
+                      18,
+                      color: Colors.white,
+                      weight: FontWeight.w700,
+                    ),
+                  ),
                 ),
                 if (isTarget)
                   Positioned(
@@ -236,10 +273,12 @@ class _TokenControlScreenState extends ConsumerState<TokenControlScreen> {
               ],
             ),
             const SizedBox(height: 4),
-            Text(t.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 9, color: AppColors.label)),
+            Text(
+              t.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 9, color: AppColors.label),
+            ),
           ],
         ),
       ),
@@ -248,21 +287,21 @@ class _TokenControlScreenState extends ConsumerState<TokenControlScreen> {
 
   Widget _legend() {
     Widget item(Color c, String t, {bool ring = false}) => Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 9,
-              height: 9,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: ring ? null : c,
-                border: ring ? Border.all(color: c, width: 2) : null,
-              ),
-            ),
-            const SizedBox(width: 5),
-            Text(t, style: const TextStyle(fontSize: 10, color: AppColors.label)),
-          ],
-        );
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 9,
+          height: 9,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: ring ? null : c,
+            border: ring ? Border.all(color: c, width: 2) : null,
+          ),
+        ),
+        const SizedBox(width: 5),
+        Text(t, style: const TextStyle(fontSize: 10, color: AppColors.label)),
+      ],
+    );
     return Wrap(
       alignment: WrapAlignment.center,
       spacing: 14,
@@ -289,14 +328,20 @@ class _TokenControlScreenState extends ConsumerState<TokenControlScreen> {
           height: 46,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: center != null ? const Color(0xFF1A1C21) : const Color(0xFF22252B),
+            color: center != null
+                ? const Color(0xFF1A1C21)
+                : const Color(0xFF22252B),
             borderRadius: BorderRadius.circular(11),
-            border:
-                center != null ? null : Border.all(color: AppColors.gold.withAlpha(64)),
+            border: center != null
+                ? null
+                : Border.all(color: AppColors.gold.withAlpha(64)),
           ),
           child: icon != null
               ? Icon(icon, color: AppColors.gold, size: 20)
-              : Text(center!, style: cinzel(13, color: const Color(0xFF6F6A60))),
+              : Text(
+                  center!,
+                  style: cinzel(13, color: const Color(0xFF6F6A60)),
+                ),
         ),
       );
     }
@@ -304,29 +349,50 @@ class _TokenControlScreenState extends ConsumerState<TokenControlScreen> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Row(mainAxisSize: MainAxisSize.min, children: [
-          cell(),
-          const SizedBox(width: 5),
-          cell(icon: Icons.keyboard_arrow_up, onTap: _moving ? null : () => _step(StepDirection.up)),
-          const SizedBox(width: 5),
-          cell(),
-        ]),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            cell(),
+            const SizedBox(width: 5),
+            cell(
+              icon: Icons.keyboard_arrow_up,
+              onTap: _moving ? null : () => _step(StepDirection.up),
+            ),
+            const SizedBox(width: 5),
+            cell(),
+          ],
+        ),
         const SizedBox(height: 5),
-        Row(mainAxisSize: MainAxisSize.min, children: [
-          cell(icon: Icons.keyboard_arrow_left, onTap: _moving ? null : () => _step(StepDirection.left)),
-          const SizedBox(width: 5),
-          cell(center: _selectedId != null ? '•' : ''),
-          const SizedBox(width: 5),
-          cell(icon: Icons.keyboard_arrow_right, onTap: _moving ? null : () => _step(StepDirection.right)),
-        ]),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            cell(
+              icon: Icons.keyboard_arrow_left,
+              onTap: _moving ? null : () => _step(StepDirection.left),
+            ),
+            const SizedBox(width: 5),
+            cell(center: _selectedId != null ? '•' : ''),
+            const SizedBox(width: 5),
+            cell(
+              icon: Icons.keyboard_arrow_right,
+              onTap: _moving ? null : () => _step(StepDirection.right),
+            ),
+          ],
+        ),
         const SizedBox(height: 5),
-        Row(mainAxisSize: MainAxisSize.min, children: [
-          cell(),
-          const SizedBox(width: 5),
-          cell(icon: Icons.keyboard_arrow_down, onTap: _moving ? null : () => _step(StepDirection.down)),
-          const SizedBox(width: 5),
-          cell(),
-        ]),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            cell(),
+            const SizedBox(width: 5),
+            cell(
+              icon: Icons.keyboard_arrow_down,
+              onTap: _moving ? null : () => _step(StepDirection.down),
+            ),
+            const SizedBox(width: 5),
+            cell(),
+          ],
+        ),
       ],
     );
   }
@@ -343,8 +409,14 @@ class _TokenControlScreenState extends ConsumerState<TokenControlScreen> {
           borderRadius: BorderRadius.circular(11),
           border: Border.all(color: color.withAlpha(90)),
         ),
-        child: Text(label,
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: color)),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
+        ),
       ),
     );
   }

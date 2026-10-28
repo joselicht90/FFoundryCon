@@ -28,21 +28,30 @@ class _SpellsListState extends ConsumerState<SpellsList> {
         padding: const EdgeInsets.fromLTRB(2, 16, 2, 9),
         child: Row(
           children: [
-            Icon(open ? Icons.expand_more : Icons.chevron_right,
-                size: 18, color: AppColors.gold),
+            Icon(
+              open ? Icons.expand_more : Icons.chevron_right,
+              size: 18,
+              color: AppColors.gold,
+            ),
             const SizedBox(width: 4),
-            Text(title.toUpperCase(),
-                style: const TextStyle(
-                    fontSize: 11,
-                    letterSpacing: 1.6,
-                    color: AppColors.gold,
-                    fontWeight: FontWeight.w700)),
+            Text(
+              title.toUpperCase(),
+              style: const TextStyle(
+                fontSize: 11,
+                letterSpacing: 1.6,
+                color: AppColors.gold,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
             const SizedBox(width: 8),
             Expanded(
-                child: Container(height: 1, color: AppColors.gold.withAlpha(40))),
+              child: Container(height: 1, color: AppColors.gold.withAlpha(40)),
+            ),
             const SizedBox(width: 8),
-            Text('$count',
-                style: const TextStyle(fontSize: 11, color: AppColors.label)),
+            Text(
+              '$count',
+              style: const TextStyle(fontSize: 11, color: AppColors.label),
+            ),
           ],
         ),
       ),
@@ -52,7 +61,8 @@ class _SpellsListState extends ConsumerState<SpellsList> {
   /// Conjuro "disponible": truco, preparado, o de modo siempre disponible
   /// (innate/pact/atwill/always). El resto (modo prepared sin preparar) va a
   /// la sección "No preparados".
-  bool _avail(ActorSpell s) => s.isCantrip || s.prepared || s.mode != 'prepared';
+  bool _avail(ActorSpell s) =>
+      s.isCantrip || s.prepared || s.mode != 'prepared';
 
   /// Construye los grupos por nivel (header + card) para una lista de conjuros.
   List<Widget> _byLevel(List<ActorSpell> list, {bool slots = false}) {
@@ -68,15 +78,17 @@ class _SpellsListState extends ConsumerState<SpellsList> {
       final title = level == 0 ? 'Cantrips' : 'Nivel $level';
       final slotStr = slot != null ? '${slot.value}/${slot.max} slots' : null;
       out.add(_LevelHeader(title: title, slots: slotStr));
-      out.add(SheetCard(
-        padding: EdgeInsets.zero,
-        child: Column(
-          children: [
-            for (int i = 0; i < spells.length; i++)
-              _SpellRow(spell: spells[i], last: i == spells.length - 1),
-          ],
+      out.add(
+        SheetCard(
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              for (int i = 0; i < spells.length; i++)
+                _SpellRow(spell: spells[i], last: i == spells.length - 1),
+            ],
+          ),
         ),
-      ));
+      );
       out.add(const SizedBox(height: 14));
     }
     return out;
@@ -93,8 +105,9 @@ class _SpellsListState extends ConsumerState<SpellsList> {
         : actor.spells.where((s) => s.name.toLowerCase().contains(q)).toList();
 
     // La clase "prepara" si hay algún conjuro de nivel sin preparar.
-    final prepares = actor.spells
-        .any((s) => !s.isCantrip && !s.prepared && s.mode == 'prepared');
+    final prepares = actor.spells.any(
+      (s) => !s.isCantrip && !s.prepared && s.mode == 'prepared',
+    );
 
     final children = <Widget>[
       if (actor.spellSlots.isNotEmpty) ...[
@@ -112,9 +125,11 @@ class _SpellsListState extends ConsumerState<SpellsList> {
     void addSection(String title, List<ActorSpell> list, {bool slots = false}) {
       if (list.isEmpty) return;
       final open = !_closed.contains(title);
-      children.add(_section(title, list.length, open, () {
-        setState(() => open ? _closed.add(title) : _closed.remove(title));
-      }));
+      children.add(
+        _section(title, list.length, open, () {
+          setState(() => open ? _closed.add(title) : _closed.remove(title));
+        }),
+      );
       if (open) children.addAll(_byLevel(list, slots: slots));
     }
 
@@ -129,11 +144,17 @@ class _SpellsListState extends ConsumerState<SpellsList> {
         prepares || atwill.isNotEmpty || innate.isNotEmpty || pact.isNotEmpty;
 
     if (spells.isEmpty) {
-      children.add(const Padding(
-        padding: EdgeInsets.all(24),
-        child: Center(
-            child: Text('Sin resultados', style: TextStyle(color: AppColors.label))),
-      ));
+      children.add(
+        const Padding(
+          padding: EdgeInsets.all(24),
+          child: Center(
+            child: Text(
+              'Sin resultados',
+              style: TextStyle(color: AppColors.label),
+            ),
+          ),
+        ),
+      );
     } else if (useSections) {
       if (prepares) {
         addSection('Preparados', book.where(_avail).toList(), slots: true);
@@ -180,8 +201,9 @@ class _SlotsOverviewState extends ConsumerState<_SlotsOverview> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('No se pudo: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('No se pudo: $e')));
       }
     }
     if (mounted) setState(() => _busy = false);
@@ -189,8 +211,9 @@ class _SlotsOverviewState extends ConsumerState<_SlotsOverview> {
 
   @override
   Widget build(BuildContext context) {
-    final ordered = [...widget.slots]
-      ..sort((a, b) => a.pact == b.pact ? a.level - b.level : (a.pact ? 1 : -1));
+    final ordered = [
+      ...widget.slots,
+    ]..sort((a, b) => a.pact == b.pact ? a.level - b.level : (a.pact ? 1 : -1));
     return SheetCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -202,7 +225,10 @@ class _SlotsOverviewState extends ConsumerState<_SlotsOverview> {
                 borderRadius: BorderRadius.circular(8),
                 onTap: _busy ? null : _restore,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -211,11 +237,20 @@ class _SlotsOverviewState extends ConsumerState<_SlotsOverview> {
                               width: 14,
                               height: 14,
                               child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: AppColors.gold))
-                          : const Icon(Icons.refresh, size: 16, color: AppColors.gold),
+                                strokeWidth: 2,
+                                color: AppColors.gold,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.refresh,
+                              size: 16,
+                              color: AppColors.gold,
+                            ),
                       const SizedBox(width: 4),
-                      const Text('Regenerar',
-                          style: TextStyle(fontSize: 11, color: AppColors.gold)),
+                      const Text(
+                        'Regenerar',
+                        style: TextStyle(fontSize: 11, color: AppColors.gold),
+                      ),
                     ],
                   ),
                 ),
@@ -239,34 +274,36 @@ class _SlotsOverviewState extends ConsumerState<_SlotsOverview> {
     final nv = (s.value + d).clamp(0, s.max);
     if (nv == s.value) return;
     try {
-      await ref
-          .read(actorControllerProvider.notifier)
-          .edit({'system.spells.${s.key}.value': nv});
+      await ref.read(actorControllerProvider.notifier).edit({
+        'system.spells.${s.key}.value': nv,
+      });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('No se pudo: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('No se pudo: $e')));
       }
     }
   }
 
   Widget _stepBtn(IconData ic, bool enabled, VoidCallback onTap) => InkWell(
+    borderRadius: BorderRadius.circular(6),
+    onTap: enabled ? onTap : null,
+    child: Container(
+      width: 22,
+      height: 22,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(6),
-        onTap: enabled ? onTap : null,
-        child: Container(
-          width: 22,
-          height: 22,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(
-                color: AppColors.gold.withAlpha(enabled ? 120 : 40)),
-          ),
-          child: Icon(ic,
-              size: 14,
-              color: enabled ? AppColors.gold : AppColors.gold.withAlpha(60)),
-        ),
-      );
+        border: Border.all(color: AppColors.gold.withAlpha(enabled ? 120 : 40)),
+      ),
+      child: Icon(
+        ic,
+        size: 14,
+        color: enabled ? AppColors.gold : AppColors.gold.withAlpha(60),
+      ),
+    ),
+  );
 
   Widget _chip(SpellSlot s) {
     final label = s.pact ? 'Pacto N${s.level}' : 'N${s.level}';
@@ -277,16 +314,21 @@ class _SlotsOverviewState extends ConsumerState<_SlotsOverview> {
       decoration: BoxDecoration(
         color: AppColors.gold.withAlpha(s.value > 0 ? 28 : 12),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.gold.withAlpha(s.value > 0 ? 110 : 50)),
+        border: Border.all(
+          color: AppColors.gold.withAlpha(s.value > 0 ? 110 : 50),
+        ),
       ),
       child: Column(
         children: [
-          Text(label,
-              style: TextStyle(
-                  fontSize: 10,
-                  letterSpacing: 0.5,
-                  fontWeight: FontWeight.w700,
-                  color: s.value > 0 ? AppColors.gold : AppColors.label)),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              letterSpacing: 0.5,
+              fontWeight: FontWeight.w700,
+              color: s.value > 0 ? AppColors.gold : AppColors.label,
+            ),
+          ),
           const SizedBox(height: 4),
           if (s.max <= 6)
             Row(
@@ -300,8 +342,12 @@ class _SlotsOverviewState extends ConsumerState<_SlotsOverview> {
                       height: 9,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: i < s.value ? AppColors.gold : Colors.transparent,
-                        border: Border.all(color: AppColors.gold.withAlpha(140)),
+                        color: i < s.value
+                            ? AppColors.gold
+                            : Colors.transparent,
+                        border: Border.all(
+                          color: AppColors.gold.withAlpha(140),
+                        ),
                       ),
                     ),
                   ),
@@ -315,11 +361,14 @@ class _SlotsOverviewState extends ConsumerState<_SlotsOverview> {
               _stepBtn(Icons.remove, s.value > 0, () => _delta(s, -1)),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text('$libres/${s.max}',
-                    style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.gold)),
+                child: Text(
+                  '$libres/${s.max}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.gold,
+                  ),
+                ),
               ),
               _stepBtn(Icons.add, s.value < s.max, () => _delta(s, 1)),
             ],
@@ -341,17 +390,25 @@ class _LevelHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(2, 0, 2, 8),
       child: Row(
         children: [
-          Text(title,
-              style: const TextStyle(
-                  fontSize: 11,
-                  letterSpacing: 1,
-                  color: AppColors.gold,
-                  fontWeight: FontWeight.w600)),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 11,
+              letterSpacing: 1,
+              color: AppColors.gold,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(width: 9),
-          Expanded(child: Container(height: 1, color: AppColors.gold.withAlpha(36))),
+          Expanded(
+            child: Container(height: 1, color: AppColors.gold.withAlpha(36)),
+          ),
           if (slots != null) ...[
             const SizedBox(width: 9),
-            Text(slots!, style: const TextStyle(fontSize: 10, color: AppColors.label)),
+            Text(
+              slots!,
+              style: const TextStyle(fontSize: 10, color: AppColors.label),
+            ),
           ],
         ],
       ),
@@ -387,16 +444,22 @@ class _SpellRow extends ConsumerWidget {
             Text('✦', style: TextStyle(fontSize: 13, color: AppColors.gold)),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(s.name,
-                  style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: s.prepared || s.isCantrip
-                          ? AppColors.listText
-                          : AppColors.sub)),
+              child: Text(
+                s.name,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: s.prepared || s.isCantrip
+                      ? AppColors.listText
+                      : AppColors.sub,
+                ),
+              ),
             ),
             if (meta.isNotEmpty)
-              Text(meta, style: const TextStyle(fontSize: 10, color: AppColors.label)),
+              Text(
+                meta,
+                style: const TextStyle(fontSize: 10, color: AppColors.label),
+              ),
           ],
         ),
       ),
@@ -411,10 +474,11 @@ void _showSpellDialog(BuildContext context, WidgetRef ref, ActorSpell s) {
   ].join(' · ');
   final desc = (s.description ?? '').trim();
   // Niveles de slot disponibles (no-pacto) para upcastear.
-  final slotLevels = (ref.read(actorControllerProvider).valueOrNull?.spellSlots ?? [])
-      .where((sl) => !sl.pact && sl.value > 0)
-      .map((sl) => sl.level)
-      .toList();
+  final slotLevels =
+      (ref.read(actorControllerProvider).valueOrNull?.spellSlots ?? [])
+          .where((sl) => !sl.pact && sl.value > 0)
+          .map((sl) => sl.level)
+          .toList();
 
   showDialog<void>(
     context: context,
@@ -426,7 +490,9 @@ void _showSpellDialog(BuildContext context, WidgetRef ref, ActorSpell s) {
       ),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(ctx).size.height * 0.72, maxWidth: 460),
+          maxHeight: MediaQuery.of(ctx).size.height * 0.72,
+          maxWidth: 460,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -436,14 +502,19 @@ void _showSpellDialog(BuildContext context, WidgetRef ref, ActorSpell s) {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(s.name,
-                      style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.name)),
+                  Text(
+                    s.name,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.name,
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  Text(meta,
-                      style: const TextStyle(fontSize: 11, color: AppColors.gold)),
+                  Text(
+                    meta,
+                    style: const TextStyle(fontSize: 11, color: AppColors.gold),
+                  ),
                 ],
               ),
             ),
@@ -453,7 +524,10 @@ void _showSpellDialog(BuildContext context, WidgetRef ref, ActorSpell s) {
                 child: Text(
                   desc.isEmpty ? 'Sin descripción.' : desc,
                   style: const TextStyle(
-                      fontSize: 13, height: 1.45, color: AppColors.listText),
+                    fontSize: 13,
+                    height: 1.45,
+                    color: AppColors.listText,
+                  ),
                 ),
               ),
             ),
@@ -464,33 +538,43 @@ void _showSpellDialog(BuildContext context, WidgetRef ref, ActorSpell s) {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      child: const Text('Cerrar')),
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text('Cerrar'),
+                  ),
                   if (s.damage != null)
                     TextButton(
                       onPressed: () {
                         Navigator.pop(ctx);
-                        rollDamageTargeted(context, ref, itemId: s.id, name: s.name);
+                        rollDamageTargeted(
+                          context,
+                          ref,
+                          itemId: s.id,
+                          name: s.name,
+                        );
                       },
                       child: const Text('Daño'),
                     ),
                   if (s.canUse)
                     FilledButton.icon(
                       style: FilledButton.styleFrom(
-                          backgroundColor: AppColors.gold,
-                          foregroundColor: Colors.black),
+                        backgroundColor: AppColors.gold,
+                        foregroundColor: Colors.black,
+                      ),
                       icon: const Icon(Icons.gps_fixed, size: 16),
                       onPressed: () {
                         Navigator.pop(ctx);
-                        castWithTargets(context, ref,
-                            itemId: s.id,
-                            name: s.name,
-                            hasAttack: s.hasAttack,
-                            needsTargets: s.needsTargets,
-                            hasResource: !s.isCantrip || s.uses != null,
-                            activities: s.activities,
-                            spellLevel: s.level,
-                            slotLevels: slotLevels);
+                        castWithTargets(
+                          context,
+                          ref,
+                          itemId: s.id,
+                          name: s.name,
+                          hasAttack: s.hasAttack,
+                          needsTargets: s.needsTargets,
+                          hasResource: !s.isCantrip || s.uses != null,
+                          activities: s.activities,
+                          spellLevel: s.level,
+                          slotLevels: slotLevels,
+                        );
                       },
                       label: const Text('Lanzar'),
                     ),
@@ -514,8 +598,10 @@ class _Empty extends StatelessWidget {
         children: [
           Text('✦', style: TextStyle(fontSize: 30, color: AppColors.label)),
           SizedBox(height: 10),
-          Text('No es lanzador de conjuros',
-              style: TextStyle(color: AppColors.label)),
+          Text(
+            'No es lanzador de conjuros',
+            style: TextStyle(color: AppColors.label),
+          ),
         ],
       ),
     );

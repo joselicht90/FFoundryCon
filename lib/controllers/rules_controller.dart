@@ -6,8 +6,7 @@ import '../repositories/foundry_repository.dart';
 /// Reglas de la casa (CRUD contra el reader/Mongo).
 class RulesController extends AsyncNotifier<List<Rule>> {
   @override
-  Future<List<Rule>> build() =>
-      ref.read(foundryRepositoryProvider).getRules();
+  Future<List<Rule>> build() => ref.read(foundryRepositoryProvider).getRules();
 
   Future<void> refresh() async {
     state = const AsyncLoading();
@@ -17,7 +16,11 @@ class RulesController extends AsyncNotifier<List<Rule>> {
   }
 
   /// Crea (id null) o edita una regla y refleja el resultado en la lista.
-  Future<void> save({String? id, required String title, required String body}) async {
+  Future<void> save({
+    String? id,
+    required String title,
+    required String body,
+  }) async {
     final saved = await ref
         .read(foundryRepositoryProvider)
         .saveRule(id: id, title: title, body: body);

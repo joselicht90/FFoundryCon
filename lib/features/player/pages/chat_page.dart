@@ -14,13 +14,16 @@ import '../widgets/roll_card.dart';
 import '../widgets/sheet_kit.dart';
 
 ({String formula, int total, List<int> values})? _evalDice(String input) {
-  final m = RegExp(r'^(\d*)d(\d+)\s*([+-]\s*\d+)?$', caseSensitive: false)
-      .firstMatch(input.trim());
+  final m = RegExp(
+    r'^(\d*)d(\d+)\s*([+-]\s*\d+)?$',
+    caseSensitive: false,
+  ).firstMatch(input.trim());
   if (m == null) return null;
   final n = int.tryParse(m.group(1) ?? '') ?? 1;
   if (n < 1 || n > 100) return null;
   final faces = int.parse(m.group(2)!);
-  final mod = int.tryParse((m.group(3) ?? '0').replaceAll(RegExp(r'\s'), '')) ?? 0;
+  final mod =
+      int.tryParse((m.group(3) ?? '0').replaceAll(RegExp(r'\s'), '')) ?? 0;
   final rng = Random();
   final values = List.generate(n, (_) => rng.nextInt(faces) + 1);
   final total = values.fold<int>(0, (a, b) => a + b) + mod;
@@ -64,8 +67,11 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   void _autoScroll() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scroll.hasClients) {
-        _scroll.animateTo(_scroll.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 200), curve: Curves.easeOut);
+        _scroll.animateTo(
+          _scroll.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
       }
     });
   }
@@ -116,7 +122,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           authorColor: _color,
           userId: _userId,
           text: raw,
-          whisper: _whisper.toList());
+          whisper: _whisper.toList(),
+        );
       }
     } catch (e) {
       _toast('Error: $e');
@@ -126,7 +133,9 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   Future<void> _quickRoll(String die) async {
     final r = _evalDice(die);
     if (r == null) return;
-    await ref.read(chatControllerProvider.notifier).send(
+    await ref
+        .read(chatControllerProvider.notifier)
+        .send(
           author: _author,
           authorColor: _color,
           userId: _userId,
@@ -171,7 +180,9 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     }
     final formula = _poolLabel(_pool);
     setState(_pool.clear);
-    await ref.read(chatControllerProvider.notifier).send(
+    await ref
+        .read(chatControllerProvider.notifier)
+        .send(
           author: _author,
           authorColor: _color,
           userId: _userId,
@@ -196,7 +207,9 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               ListTile(
                 leading: const Icon(Icons.public, color: AppColors.gold),
                 title: const Text('Público (todos)'),
-                trailing: _whisper.isEmpty ? const Icon(Icons.check, color: AppColors.gold) : null,
+                trailing: _whisper.isEmpty
+                    ? const Icon(Icons.check, color: AppColors.gold)
+                    : null,
                 onTap: () {
                   setState(_whisper.clear);
                   Navigator.pop(ctx);
@@ -207,12 +220,16 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 CheckboxListTile(
                   value: _whisper.contains(u.id),
                   title: Text(u.name),
-                  subtitle: Text(u.isGM ? 'Game Master' : 'Jugador',
-                      style: const TextStyle(fontSize: 11)),
+                  subtitle: Text(
+                    u.isGM ? 'Game Master' : 'Jugador',
+                    style: const TextStyle(fontSize: 11),
+                  ),
                   activeColor: AppColors.gold,
-                  onChanged: (v) => setSheet(() => setState(() {
-                        v == true ? _whisper.add(u.id) : _whisper.remove(u.id);
-                      })),
+                  onChanged: (v) => setSheet(
+                    () => setState(() {
+                      v == true ? _whisper.add(u.id) : _whisper.remove(u.id);
+                    }),
+                  ),
                 ),
             ],
           ),
@@ -227,7 +244,10 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     final users = world == null
         ? const []
         : (ref.read(worldUsersProvider(world.id)).valueOrNull ?? []);
-    final names = users.where((u) => _whisper.contains(u.id)).map((u) => u.name).toList();
+    final names = users
+        .where((u) => _whisper.contains(u.id))
+        .map((u) => u.name)
+        .toList();
     if (names.isEmpty) return '${_whisper.length} priv.';
     return names.length == 1 ? names.first : '${names.length} usuarios';
   }
@@ -238,7 +258,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     }
   }
 
-  Future<void> _refresh() => ref.read(chatControllerProvider.notifier).refresh();
+  Future<void> _refresh() =>
+      ref.read(chatControllerProvider.notifier).refresh();
 
   Future<void> _clear() async {
     final ok = await showDialog<bool>(
@@ -246,9 +267,13 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       builder: (ctx) => AlertDialog(
         title: const Text('Borrar chat'),
         content: const Text(
-            'Esto borra la copia local del chat (no afecta a Foundry). ¿Seguro?'),
+          'Esto borra la copia local del chat (no afecta a Foundry). ¿Seguro?',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppColors.red),
             onPressed: () => Navigator.pop(ctx, true),
@@ -277,21 +302,33 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       children: [
         Column(
           children: [
-            _ChatHeader(count: messages.length, onRefresh: _refresh, onClear: _clear),
+            _ChatHeader(
+              count: messages.length,
+              onRefresh: _refresh,
+              onClear: _clear,
+            ),
             Expanded(
               child: async.isLoading && messages.isEmpty
                   ? const Center(child: CircularProgressIndicator())
                   : messages.isEmpty
-                      ? const Center(
-                          child: Text('Sin mensajes todavía',
-                              style: TextStyle(color: AppColors.label)))
-                      : ListView.separated(
-                          controller: _scroll,
-                          padding: EdgeInsets.fromLTRB(11, 10, 11, _composerOpen ? 6 : 80),
-                          itemCount: messages.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 7),
-                          itemBuilder: (_, i) => _MessageView(msg: messages[i]),
-                        ),
+                  ? const Center(
+                      child: Text(
+                        'Sin mensajes todavía',
+                        style: TextStyle(color: AppColors.label),
+                      ),
+                    )
+                  : ListView.separated(
+                      controller: _scroll,
+                      padding: EdgeInsets.fromLTRB(
+                        11,
+                        10,
+                        11,
+                        _composerOpen ? 6 : 80,
+                      ),
+                      itemCount: messages.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 7),
+                      itemBuilder: (_, i) => _MessageView(msg: messages[i]),
+                    ),
             ),
             if (_composerOpen)
               _Composer(
@@ -333,7 +370,12 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                     end: Alignment.bottomCenter,
                     colors: [Color(0xFFA8843A), Color(0xFF8A6A2A)],
                   ),
-                  boxShadow: [BoxShadow(color: Colors.black.withAlpha(120), blurRadius: 8)],
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(120),
+                      blurRadius: 8,
+                    ),
+                  ],
                 ),
                 child: const D20Icon(size: 30, color: Color(0xFF1A160C)),
               ),
@@ -352,10 +394,15 @@ class _MessageView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (msg.isSystem) {
       return Center(
-        child: Text(msg.text ?? '',
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-                fontSize: 11, fontStyle: FontStyle.italic, color: AppColors.label)),
+        child: Text(
+          msg.text ?? '',
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 11,
+            fontStyle: FontStyle.italic,
+            color: AppColors.label,
+          ),
+        ),
       );
     }
     if (!msg.isRoll) return _TextBubble(msg: msg);
@@ -376,7 +423,11 @@ class _MessageView extends ConsumerWidget {
     if (ad != null && ad.targets.isNotEmpty && isGM) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [card, const SizedBox(height: 6), ApplyDamageBar(apply: ad)],
+        children: [
+          card,
+          const SizedBox(height: 6),
+          ApplyDamageBar(apply: ad),
+        ],
       );
     }
     return card;
@@ -395,11 +446,19 @@ class _TextBubble extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text(msg.author,
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: author)),
+            Text(
+              msg.author,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: author,
+              ),
+            ),
             const SizedBox(width: 7),
-            Text(_time(msg.timestamp),
-                style: const TextStyle(fontSize: 9, color: Color(0xFF6F6A60))),
+            Text(
+              _time(msg.timestamp),
+              style: const TextStyle(fontSize: 9, color: Color(0xFF6F6A60)),
+            ),
             if (msg.isPrivate) ...[
               const SizedBox(width: 5),
               const Icon(Icons.lock, size: 11, color: AppColors.orange),
@@ -412,8 +471,14 @@ class _TextBubble extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                   border: Border.all(color: AppColors.border),
                 ),
-                child: const Text('OOC',
-                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: AppColors.label)),
+                child: const Text(
+                  'OOC',
+                  style: TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.label,
+                  ),
+                ),
               ),
             ],
           ],
@@ -431,12 +496,15 @@ class _TextBubble extends StatelessWidget {
               bottomRight: Radius.circular(11),
             ),
           ),
-          child: Text(msg.text ?? '',
-              style: TextStyle(
-                  fontSize: 12.5,
-                  height: 1.4,
-                  fontStyle: msg.isOoc ? FontStyle.italic : FontStyle.normal,
-                  color: msg.isOoc ? AppColors.muted : AppColors.listText)),
+          child: Text(
+            msg.text ?? '',
+            style: TextStyle(
+              fontSize: 12.5,
+              height: 1.4,
+              fontStyle: msg.isOoc ? FontStyle.italic : FontStyle.normal,
+              color: msg.isOoc ? AppColors.muted : AppColors.listText,
+            ),
+          ),
         ),
       ],
     );
@@ -500,70 +568,83 @@ class _Composer extends StatelessWidget {
               onTap: onClose,
               child: const Padding(
                 padding: EdgeInsets.fromLTRB(10, 2, 6, 6),
-                child: Icon(Icons.keyboard_arrow_down, size: 22, color: AppColors.label),
+                child: Icon(
+                  Icons.keyboard_arrow_down,
+                  size: 22,
+                  color: AppColors.label,
+                ),
               ),
             ),
           ),
           if (diceOpen)
-          SizedBox(
-            height: 44,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: dice.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 6),
-              itemBuilder: (_, i) {
-                final faces = dice[i];
-                final count = pool[faces] ?? 0;
-                return InkWell(
-                  borderRadius: BorderRadius.circular(10),
-                  onTap: () => onDieTap(faces),
-                  onLongPress: () => onDieLong(faces),
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Container(
-                        width: 46,
-                        height: 40,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: count > 0 ? AppColors.gold.withAlpha(46) : AppColors.card,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
+            SizedBox(
+              height: 44,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: dice.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 6),
+                itemBuilder: (_, i) {
+                  final faces = dice[i];
+                  final count = pool[faces] ?? 0;
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(10),
+                    onTap: () => onDieTap(faces),
+                    onLongPress: () => onDieLong(faces),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          width: 46,
+                          height: 40,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: count > 0
+                                ? AppColors.gold.withAlpha(46)
+                                : AppColors.card,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
                               color: count > 0
                                   ? AppColors.gold
-                                  : AppColors.gold.withAlpha(52)),
-                        ),
-                        child: Text('d$faces',
-                            style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.gold)),
-                      ),
-                      if (count > 0)
-                        Positioned(
-                          top: -5,
-                          right: -5,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            constraints: const BoxConstraints(minWidth: 18),
-                            alignment: Alignment.center,
-                            decoration: const BoxDecoration(
-                              color: AppColors.gold,
-                              shape: BoxShape.circle,
+                                  : AppColors.gold.withAlpha(52),
                             ),
-                            child: Text('$count',
-                                style: const TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w800,
-                                    color: Colors.black)),
+                          ),
+                          child: Text(
+                            'd$faces',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.gold,
+                            ),
                           ),
                         ),
-                    ],
-                  ),
-                );
-              },
+                        if (count > 0)
+                          Positioned(
+                            top: -5,
+                            right: -5,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              constraints: const BoxConstraints(minWidth: 18),
+                              alignment: Alignment.center,
+                              decoration: const BoxDecoration(
+                                color: AppColors.gold,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Text(
+                                '$count',
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
           if (diceOpen && building) ...[
             const SizedBox(height: 9),
             Container(
@@ -578,27 +659,37 @@ class _Composer extends StatelessWidget {
                   const Icon(Icons.casino, size: 16, color: AppColors.gold),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(poolLabel,
-                        style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.gold)),
+                    child: Text(
+                      poolLabel,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.gold,
+                      ),
+                    ),
                   ),
                   TextButton(
                     onPressed: onRollPool,
                     style: TextButton.styleFrom(
-                        foregroundColor: AppColors.gold,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        minimumSize: const Size(0, 32)),
-                    child: const Text('Tirar',
-                        style: TextStyle(fontWeight: FontWeight.w700)),
+                      foregroundColor: AppColors.gold,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      minimumSize: const Size(0, 32),
+                    ),
+                    child: const Text(
+                      'Tirar',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
                   ),
                   InkWell(
                     onTap: onClearPool,
                     borderRadius: BorderRadius.circular(16),
                     child: const Padding(
                       padding: EdgeInsets.all(6),
-                      child: Icon(Icons.close, size: 16, color: AppColors.label),
+                      child: Icon(
+                        Icons.close,
+                        size: 16,
+                        color: AppColors.label,
+                      ),
                     ),
                   ),
                 ],
@@ -622,10 +713,20 @@ class _Composer extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(isPrivate ? Icons.lock : Icons.public, size: 13, color: pillColor),
+                    Icon(
+                      isPrivate ? Icons.lock : Icons.public,
+                      size: 13,
+                      color: pillColor,
+                    ),
                     const SizedBox(width: 5),
-                    Text('Para: $recipientLabel',
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: pillColor)),
+                    Text(
+                      'Para: $recipientLabel',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: pillColor,
+                      ),
+                    ),
                     const SizedBox(width: 3),
                     Icon(Icons.expand_more, size: 14, color: pillColor),
                   ],
@@ -645,33 +746,54 @@ class _Composer extends StatelessWidget {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    color: diceOpen ? AppColors.gold.withAlpha(46) : AppColors.card,
+                    color: diceOpen
+                        ? AppColors.gold.withAlpha(46)
+                        : AppColors.card,
                     border: Border.all(
-                        color: diceOpen ? AppColors.gold : AppColors.gold.withAlpha(70)),
+                      color: diceOpen
+                          ? AppColors.gold
+                          : AppColors.gold.withAlpha(70),
+                    ),
                   ),
-                  child: const Text('d20',
-                      style: TextStyle(
-                          fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.gold)),
+                  child: const Text(
+                    'd20',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.gold,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: TextField(
                   controller: controller,
-                  style: const TextStyle(fontSize: 13.5, color: AppColors.parchment),
+                  style: const TextStyle(
+                    fontSize: 13.5,
+                    color: AppColors.parchment,
+                  ),
                   textInputAction: TextInputAction.send,
                   onSubmitted: (_) => onSend(),
                   inputFormatters: [LengthLimitingTextInputFormatter(500)],
                   decoration: InputDecoration(
                     isDense: true,
                     hintText: 'Mensaje o /r 1d20+5',
-                    hintStyle: const TextStyle(color: AppColors.label, fontSize: 13),
+                    hintStyle: const TextStyle(
+                      color: AppColors.label,
+                      fontSize: 13,
+                    ),
                     filled: true,
                     fillColor: AppColors.card,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 13,
+                      vertical: 11,
+                    ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(11),
-                      borderSide: BorderSide(color: AppColors.gold.withAlpha(56)),
+                      borderSide: BorderSide(
+                        color: AppColors.gold.withAlpha(56),
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(11),
@@ -696,15 +818,21 @@ class _Composer extends StatelessWidget {
                       colors: [Color(0xFFA8843A), Color(0xFF8A6A2A)],
                     ),
                   ),
-                  child: const Icon(Icons.send, size: 18, color: Color(0xFF1A160C)),
+                  child: const Icon(
+                    Icons.send,
+                    size: 18,
+                    color: Color(0xFF1A160C),
+                  ),
                 ),
               ),
             ],
           ),
           if (diceOpen) ...[
             const SizedBox(height: 6),
-            const Text('Tocá un dado para tirar · mantené apretado para sumar varios · /ooc fuera de personaje',
-                style: TextStyle(fontSize: 10, color: Color(0xFF5F5A51))),
+            const Text(
+              'Tocá un dado para tirar · mantené apretado para sumar varios · /ooc fuera de personaje',
+              style: TextStyle(fontSize: 10, color: Color(0xFF5F5A51)),
+            ),
           ],
         ],
       ),
@@ -735,7 +863,10 @@ class _ChatHeader extends StatelessWidget {
           const SizedBox(width: 8),
           Text('Chat', style: cinzel(16, weight: FontWeight.w600)),
           const SizedBox(width: 6),
-          Text('· $count', style: const TextStyle(fontSize: 11, color: AppColors.label)),
+          Text(
+            '· $count',
+            style: const TextStyle(fontSize: 11, color: AppColors.label),
+          ),
           const Spacer(),
           IconButton(
             icon: const Icon(Icons.refresh, size: 20, color: AppColors.label),
@@ -743,7 +874,11 @@ class _ChatHeader extends StatelessWidget {
             onPressed: onRefresh,
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline, size: 20, color: AppColors.label),
+            icon: const Icon(
+              Icons.delete_outline,
+              size: 20,
+              color: AppColors.label,
+            ),
             tooltip: 'Borrar chat',
             onPressed: onClear,
           ),

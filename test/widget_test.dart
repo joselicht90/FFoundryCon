@@ -8,8 +8,9 @@ import 'package:ffoundrycon/core/storage/prefs_provider.dart';
 import 'package:ffoundrycon/models/foundry_world.dart';
 
 void main() {
-  testWidgets('arranca en la selección de mundo usando la URL por defecto',
-      (tester) async {
+  testWidgets('arranca en la selección de mundo usando la URL por defecto', (
+    tester,
+  ) async {
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
 

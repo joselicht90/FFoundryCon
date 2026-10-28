@@ -32,7 +32,9 @@ class DmPartyController extends AsyncNotifier<List<FoundryActor>> {
           list[idx] = updated;
           state = AsyncData(list);
         }
-      } catch (_) {/* ignore */}
+      } catch (_) {
+        /* ignore */
+      }
     });
     _poll = Timer.periodic(const Duration(seconds: 15), (_) => _reload());
     return _load();
@@ -45,7 +47,9 @@ class DmPartyController extends AsyncNotifier<List<FoundryActor>> {
     for (final s in summaries) {
       try {
         actors.add(await repo.getActor(s.id));
-      } catch (_) {/* saltear el que falle */}
+      } catch (_) {
+        /* saltear el que falle */
+      }
     }
     return actors;
   }
@@ -55,7 +59,9 @@ class DmPartyController extends AsyncNotifier<List<FoundryActor>> {
     try {
       final fresh = await _load();
       if (!_disposed) state = AsyncData(fresh);
-    } catch (_) {/* silencioso */}
+    } catch (_) {
+      /* silencioso */
+    }
   }
 
   Future<void> refresh() async {
@@ -66,4 +72,5 @@ class DmPartyController extends AsyncNotifier<List<FoundryActor>> {
 
 final dmPartyProvider =
     AsyncNotifierProvider<DmPartyController, List<FoundryActor>>(
-        DmPartyController.new);
+      DmPartyController.new,
+    );

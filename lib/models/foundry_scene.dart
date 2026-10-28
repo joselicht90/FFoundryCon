@@ -3,7 +3,8 @@ class SceneLight {
   final double x;
   final double y;
   final double radius; // radio exterior (px)
-  final double ratio; // fracción brillante (0..1): hasta acá luz plena, después cae
+  final double
+  ratio; // fracción brillante (0..1): hasta acá luz plena, después cae
   final int? color; // ARGB; null = luz neutra
   final List<double> poly; // polígono iluminado (canvas coords)
 
@@ -28,14 +29,15 @@ class SceneLight {
   }
 
   factory SceneLight.fromJson(Map<String, dynamic> j) => SceneLight(
-        x: _d(j['x']),
-        y: _d(j['y']),
-        radius: _d(j['radius']),
-        ratio: j['ratio'] is num ? (j['ratio'] as num).toDouble() : 0.5,
-        color: _color(j['color']),
-        poly: (j['poly'] as List?)?.map((n) => (n as num).toDouble()).toList() ??
-            const [],
-      );
+    x: _d(j['x']),
+    y: _d(j['y']),
+    radius: _d(j['radius']),
+    ratio: j['ratio'] is num ? (j['ratio'] as num).toDouble() : 0.5,
+    color: _color(j['color']),
+    poly:
+        (j['poly'] as List?)?.map((n) => (n as num).toDouble()).toList() ??
+        const [],
+  );
 }
 
 /// Escena activa de Foundry, para renderizar el mapa en la app.
@@ -95,26 +97,27 @@ class FoundryScene {
       v is num ? v.toDouble() : (v is String ? double.tryParse(v) ?? fb : fb);
 
   factory FoundryScene.fromJson(Map<String, dynamic> j) => FoundryScene(
-        id: j['id'] as String? ?? '',
-        name: j['name'] as String? ?? 'Escena',
-        thumb: j['thumb'] as String?,
-        background: j['background'] as String?,
-        canvasWidth: _d(j['canvasWidth'], 1000),
-        canvasHeight: _d(j['canvasHeight'], 1000),
-        sceneX: _d(j['sceneX'], 0),
-        sceneY: _d(j['sceneY'], 0),
-        sceneWidth: _d(j['sceneWidth'], 1000),
-        sceneHeight: _d(j['sceneHeight'], 1000),
-        gridSize: _d(j['gridSize'], 100),
-        gridDistance: _d(j['gridDistance'], 5),
-        gridUnits: j['gridUnits'] as String? ?? 'ft',
-        globalLight: j['globalLight'] as bool? ?? false,
-        darkness: _d(j['darkness'], 0),
-        lights: (j['lights'] as List?)
-                ?.map((l) => SceneLight.fromJson(l as Map<String, dynamic>))
-                .toList() ??
-            const [],
-        fogExploration: j['fogExploration'] as bool? ?? false,
-        fogOverlay: j['fogOverlay'] as String?,
-      );
+    id: j['id'] as String? ?? '',
+    name: j['name'] as String? ?? 'Escena',
+    thumb: j['thumb'] as String?,
+    background: j['background'] as String?,
+    canvasWidth: _d(j['canvasWidth'], 1000),
+    canvasHeight: _d(j['canvasHeight'], 1000),
+    sceneX: _d(j['sceneX'], 0),
+    sceneY: _d(j['sceneY'], 0),
+    sceneWidth: _d(j['sceneWidth'], 1000),
+    sceneHeight: _d(j['sceneHeight'], 1000),
+    gridSize: _d(j['gridSize'], 100),
+    gridDistance: _d(j['gridDistance'], 5),
+    gridUnits: j['gridUnits'] as String? ?? 'ft',
+    globalLight: j['globalLight'] as bool? ?? false,
+    darkness: _d(j['darkness'], 0),
+    lights:
+        (j['lights'] as List?)
+            ?.map((l) => SceneLight.fromJson(l as Map<String, dynamic>))
+            .toList() ??
+        const [],
+    fogExploration: j['fogExploration'] as bool? ?? false,
+    fogOverlay: j['fogOverlay'] as String?,
+  );
 }

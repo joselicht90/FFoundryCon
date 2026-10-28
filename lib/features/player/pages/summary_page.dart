@@ -31,8 +31,14 @@ class SummaryPage extends ConsumerWidget {
                     ? '—'
                     : '${actor.initiative! >= 0 ? '+' : ''}${actor.initiative}',
                 valueColor: AppColors.gold,
-                onTap: () =>
-                    rollAction(context, ref, RollKind.init, 'init', 'Iniciativa', pick: true),
+                onTap: () => rollAction(
+                  context,
+                  ref,
+                  RollKind.init,
+                  'init',
+                  'Iniciativa',
+                  pick: true,
+                ),
               ),
             ),
             const SizedBox(width: 9),
@@ -62,8 +68,10 @@ class SummaryPage extends ConsumerWidget {
               child: _AttackRow(item: it),
             ),
         ],
-        SectionHeader('Habilidades',
-            trailing: actor.prof != null ? 'Prof +${actor.prof}' : null),
+        SectionHeader(
+          'Habilidades',
+          trailing: actor.prof != null ? 'Prof +${actor.prof}' : null,
+        ),
         AbilitiesGrid(actor: actor),
         if (actor.features.isNotEmpty) ...[
           SectionHeader('Rasgos'),
@@ -84,8 +92,10 @@ class SummaryPage extends ConsumerWidget {
         label: 'Armor',
         child: EditStepper(
           value: '$cur',
-          onDec: () => editAction(context, ref, {'system.attributes.ac.flat': cur - 1}),
-          onInc: () => editAction(context, ref, {'system.attributes.ac.flat': cur + 1}),
+          onDec: () =>
+              editAction(context, ref, {'system.attributes.ac.flat': cur - 1}),
+          onInc: () =>
+              editAction(context, ref, {'system.attributes.ac.flat': cur + 1}),
         ),
       );
     }
@@ -99,10 +109,12 @@ class SummaryPage extends ConsumerWidget {
         label: 'Speed',
         child: EditStepper(
           value: '$cur',
-          onDec: () => editAction(
-              context, ref, {'system.attributes.movement.walk': '${cur - 1}'}),
-          onInc: () => editAction(
-              context, ref, {'system.attributes.movement.walk': '${cur + 1}'}),
+          onDec: () => editAction(context, ref, {
+            'system.attributes.movement.walk': '${cur - 1}',
+          }),
+          onInc: () => editAction(context, ref, {
+            'system.attributes.movement.walk': '${cur + 1}',
+          }),
         ),
       );
     }
@@ -126,17 +138,20 @@ class _AttackRow extends ConsumerWidget {
       padding: EdgeInsets.zero,
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
-        onTap: () => showActionInfoDialog(context, ref,
-            itemId: item.id,
-            name: item.name,
-            meta: meta,
-            description: item.description,
-            hasAttack: item.hasAttack,
-            hasDamage: item.damage != null,
-            canUse: item.canUse,
-            needsTargets: item.needsTargets,
-            hasResource: item.uses != null,
-            activities: item.activities),
+        onTap: () => showActionInfoDialog(
+          context,
+          ref,
+          itemId: item.id,
+          name: item.name,
+          meta: meta,
+          description: item.description,
+          hasAttack: item.hasAttack,
+          hasDamage: item.damage != null,
+          canUse: item.canUse,
+          needsTargets: item.needsTargets,
+          hasResource: item.uses != null,
+          activities: item.activities,
+        ),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
           child: Row(
@@ -145,16 +160,24 @@ class _AttackRow extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(item.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.listText)),
+                    Text(
+                      item.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.listText,
+                      ),
+                    ),
                     if (meta.isNotEmpty)
-                      Text(meta,
-                          style: const TextStyle(fontSize: 11, color: AppColors.label)),
+                      Text(
+                        meta,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.label,
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -181,21 +204,33 @@ class _InspirationChip extends ConsumerWidget {
       padding: EdgeInsets.zero,
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
-        onTap: () => editAction(
-            context, ref, {'system.attributes.inspiration': !inspired}),
+        onTap: () => editAction(context, ref, {
+          'system.attributes.inspiration': !inspired,
+        }),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
           child: Row(
             children: [
-              Icon(inspired ? Icons.star : Icons.star_border, size: 22, color: color),
+              Icon(
+                inspired ? Icons.star : Icons.star_border,
+                size: 22,
+                color: color,
+              ),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(inspired ? 'Inspirado' : 'Sin inspiración',
-                    style: TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.w600, color: color)),
+                child: Text(
+                  inspired ? 'Inspirado' : 'Sin inspiración',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: color,
+                  ),
+                ),
               ),
-              Text(inspired ? 'Gastar' : 'Marcar',
-                  style: const TextStyle(fontSize: 11, color: AppColors.label)),
+              Text(
+                inspired ? 'Gastar' : 'Marcar',
+                style: const TextStyle(fontSize: 11, color: AppColors.label),
+              ),
             ],
           ),
         ),
@@ -223,8 +258,9 @@ class _EffectsSectionState extends ConsumerState<_EffectsSection> {
       await ref.read(actorControllerProvider.notifier).endEffect(e.id);
     } catch (err) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('No se pudo terminar: $err')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('No se pudo terminar: $err')));
       }
     }
     if (mounted) setState(() => _busy.remove(e.id));
@@ -247,11 +283,20 @@ class _EffectsSectionState extends ConsumerState<_EffectsSection> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.local_fire_department, size: 15, color: AppColors.orange),
+                const Icon(
+                  Icons.local_fire_department,
+                  size: 15,
+                  color: AppColors.orange,
+                ),
                 const SizedBox(width: 6),
-                Text(e.name,
-                    style: const TextStyle(
-                        fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.orange)),
+                Text(
+                  e.name,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.orange,
+                  ),
+                ),
                 const SizedBox(width: 4),
                 InkWell(
                   borderRadius: BorderRadius.circular(14),
@@ -263,8 +308,15 @@ class _EffectsSectionState extends ConsumerState<_EffectsSection> {
                             width: 14,
                             height: 14,
                             child: CircularProgressIndicator(
-                                strokeWidth: 2, color: AppColors.orange))
-                        : const Icon(Icons.close, size: 16, color: AppColors.orange),
+                              strokeWidth: 2,
+                              color: AppColors.orange,
+                            ),
+                          )
+                        : const Icon(
+                            Icons.close,
+                            size: 16,
+                            color: AppColors.orange,
+                          ),
                   ),
                 ),
               ],
@@ -294,13 +346,18 @@ class _UsesPill extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('${uses.value}/${uses.max}',
-              style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  color: has ? AppColors.gold : AppColors.label)),
-          const Text('usos',
-              style: TextStyle(fontSize: 8, color: AppColors.label)),
+          Text(
+            '${uses.value}/${uses.max}',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: has ? AppColors.gold : AppColors.label,
+            ),
+          ),
+          const Text(
+            'usos',
+            style: TextStyle(fontSize: 8, color: AppColors.label),
+          ),
         ],
       ),
     );
@@ -318,17 +375,27 @@ class _FeatureRow extends ConsumerWidget {
       padding: EdgeInsets.zero,
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
-        onTap: () => showActionInfoDialog(context, ref,
-            itemId: item.id, name: item.name, description: item.description),
+        onTap: () => showActionInfoDialog(
+          context,
+          ref,
+          itemId: item.id,
+          name: item.name,
+          description: item.description,
+        ),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 11, 10, 11),
           child: Row(
             children: [
               Expanded(
-                child: Text(item.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 14, color: AppColors.listText)),
+                child: Text(
+                  item.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.listText,
+                  ),
+                ),
               ),
               if (item.uses != null) _UsesPill(uses: item.uses!),
               const Icon(Icons.info_outline, size: 18, color: AppColors.label),
@@ -371,9 +438,10 @@ class _XpCard extends ConsumerWidget {
                   Text(
                     xp.max > 0 ? '${xp.value} / ${xp.max}' : '${xp.value}',
                     style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.gold),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.gold,
+                    ),
                   ),
                   const SizedBox(width: 6),
                   const Icon(Icons.edit, size: 14, color: AppColors.label),
@@ -409,11 +477,7 @@ class _StepBox extends StatelessWidget {
     return SheetCard(
       padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 4),
       child: Column(
-        children: [
-          MicroLabel(label),
-          const SizedBox(height: 6),
-          child,
-        ],
+        children: [MicroLabel(label), const SizedBox(height: 6), child],
       ),
     );
   }

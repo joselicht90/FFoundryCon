@@ -15,11 +15,11 @@ class CompendiumPack {
   bool get isItem => type == 'Item';
 
   factory CompendiumPack.fromJson(Map<String, dynamic> j) => CompendiumPack(
-        id: j['id'] as String? ?? '',
-        label: j['label'] as String? ?? (j['id'] as String? ?? 'Pack'),
-        type: j['type'] as String? ?? 'Item',
-        system: j['system'] as String?,
-      );
+    id: j['id'] as String? ?? '',
+    label: j['label'] as String? ?? (j['id'] as String? ?? 'Pack'),
+    type: j['type'] as String? ?? 'Item',
+    system: j['system'] as String?,
+  );
 }
 
 /// Una entrada del índice de un pack (o resultado de búsqueda).
@@ -43,14 +43,14 @@ class CompendiumEntry {
   });
 
   factory CompendiumEntry.fromJson(Map<String, dynamic> j) => CompendiumEntry(
-        id: j['id'] as String? ?? '',
-        name: j['name'] as String? ?? '',
-        type: j['type'] as String?,
-        img: j['img'] as String?,
-        pack: j['pack'] as String? ?? '',
-        packLabel: j['packLabel'] as String?,
-        level: (j['level'] as num?)?.toInt(),
-      );
+    id: j['id'] as String? ?? '',
+    name: j['name'] as String? ?? '',
+    type: j['type'] as String?,
+    img: j['img'] as String?,
+    pack: j['pack'] as String? ?? '',
+    packLabel: j['packLabel'] as String?,
+    level: (j['level'] as num?)?.toInt(),
+  );
 }
 
 /// Detalle completo de una entrada (con descripción).
@@ -70,10 +70,10 @@ class CompendiumDetail {
   });
 
   factory CompendiumDetail.fromJson(Map<String, dynamic> j) => CompendiumDetail(
-        id: j['id'] as String? ?? '',
-        name: j['name'] as String? ?? '',
-        type: j['type'] as String?,
-        img: j['img'] as String?,
-        description: j['description'] as String? ?? '',
-      );
+    id: j['id'] as String? ?? '',
+    name: j['name'] as String? ?? '',
+    type: j['type'] as String?,
+    img: j['img'] as String?,
+    description: j['description'] as String? ?? '',
+  );
 }

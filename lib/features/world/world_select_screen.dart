@@ -15,9 +15,9 @@ class WorldSelectScreen extends ConsumerWidget {
 
   void _select(BuildContext context, WidgetRef ref, FoundryWorld world) {
     ref.read(selectedWorldProvider.notifier).select(world);
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const UserSelectScreen()),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const UserSelectScreen()));
   }
 
   @override
@@ -36,9 +36,9 @@ class WorldSelectScreen extends ConsumerWidget {
         IconButton(
           icon: const Icon(Icons.settings, color: AppColors.label),
           tooltip: 'Configuración',
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const SettingsScreen()),
-          ),
+          onPressed: () => Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const SettingsScreen())),
         ),
       ],
       child: worlds.when(
@@ -113,7 +113,9 @@ class _WorldCard extends StatelessWidget {
                         image: NetworkImage(imageUrl!),
                         fit: BoxFit.cover,
                         colorFilter: ColorFilter.mode(
-                            Colors.black.withAlpha(60), BlendMode.darken),
+                          Colors.black.withAlpha(60),
+                          BlendMode.darken,
+                        ),
                       )
                     : null,
               ),
@@ -121,17 +123,23 @@ class _WorldCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withAlpha(128),
                       borderRadius: BorderRadius.circular(5),
                     ),
-                    child: Text((world.system ?? 'FOUNDRY').toUpperCase(),
-                        style: const TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1,
-                            color: Colors.white)),
+                    child: Text(
+                      (world.system ?? 'FOUNDRY').toUpperCase(),
+                      style: const TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -146,13 +154,21 @@ class _WorldCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(world.id,
-                          style: const TextStyle(fontSize: 11, color: AppColors.label)),
-                      const Text('Entrar ›',
-                          style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.gold)),
+                      Text(
+                        world.id,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.label,
+                        ),
+                      ),
+                      const Text(
+                        'Entrar ›',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.gold,
+                        ),
+                      ),
                     ],
                   ),
                 ],

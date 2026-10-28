@@ -13,7 +13,11 @@ import 'player_screen.dart';
 class ActorSelectScreen extends ConsumerWidget {
   const ActorSelectScreen({super.key});
 
-  Future<void> _open(BuildContext context, WidgetRef ref, String actorId) async {
+  Future<void> _open(
+    BuildContext context,
+    WidgetRef ref,
+    String actorId,
+  ) async {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -30,9 +34,9 @@ class ActorSelectScreen extends ConsumerWidget {
       );
       return;
     }
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const PlayerScreen()),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const PlayerScreen()));
   }
 
   @override
@@ -57,7 +61,8 @@ class ActorSelectScreen extends ConsumerWidget {
       child: actorsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => _ErrorView(
-          message: 'No se pudieron leer los personajes.\n'
+          message:
+              'No se pudieron leer los personajes.\n'
               'Si Foundry está cerrado, se usa la base local.\n\n$e',
           onRetry: () => ref.invalidate(actorsProvider),
         ),
@@ -66,13 +71,16 @@ class ActorSelectScreen extends ConsumerWidget {
           final mine = <ActorSummary>[];
           final others = <ActorSummary>[];
           for (final a in actors) {
-            (user != null && a.userIds.contains(user.id) ? mine : others).add(a);
+            (user != null && a.userIds.contains(user.id) ? mine : others).add(
+              a,
+            );
           }
           final ordered = isGM ? [...mine, ...others] : mine;
 
           if (ordered.isEmpty) {
             return _ErrorView(
-              message: '${user?.name ?? 'Este usuario'} no tiene personajes asignados.',
+              message:
+                  '${user?.name ?? 'Este usuario'} no tiene personajes asignados.',
               onRetry: () => ref.invalidate(actorsProvider),
             );
           }
@@ -125,7 +133,10 @@ class _CharacterCard extends StatelessWidget {
           color: AppColors.bgAlt,
           borderRadius: BorderRadius.circular(15),
           border: Border.all(
-              color: mine ? AppColors.gold.withAlpha(90) : AppColors.gold.withAlpha(46)),
+            color: mine
+                ? AppColors.gold.withAlpha(90)
+                : AppColors.gold.withAlpha(46),
+          ),
         ),
         child: Row(
           children: [
@@ -136,7 +147,10 @@ class _CharacterCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.gold.withAlpha(110)),
                 image: imageUrl != null
-                    ? DecorationImage(image: NetworkImage(imageUrl!), fit: BoxFit.cover)
+                    ? DecorationImage(
+                        image: NetworkImage(imageUrl!),
+                        fit: BoxFit.cover,
+                      )
                     : null,
               ),
               alignment: Alignment.center,
@@ -151,8 +165,10 @@ class _CharacterCard extends StatelessWidget {
                 children: [
                   Text(name, style: cinzel(16, weight: FontWeight.w600)),
                   if (mine)
-                    const Text('Tu personaje',
-                        style: TextStyle(fontSize: 12, color: AppColors.gold)),
+                    const Text(
+                      'Tu personaje',
+                      style: TextStyle(fontSize: 12, color: AppColors.gold),
+                    ),
                 ],
               ),
             ),
@@ -161,9 +177,14 @@ class _CharacterCard extends StatelessWidget {
                 padding: EdgeInsets.only(right: 6),
                 child: Icon(Icons.star, size: 16, color: AppColors.gold),
               ),
-            const Text('Jugar ›',
-                style: TextStyle(
-                    fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.gold)),
+            const Text(
+              'Jugar ›',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: AppColors.gold,
+              ),
+            ),
           ],
         ),
       ),

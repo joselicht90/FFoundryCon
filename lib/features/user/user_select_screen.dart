@@ -24,7 +24,8 @@ class UserSelectScreen extends ConsumerWidget {
     ref.read(selectedUserProvider.notifier).select(user);
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => user.isGM ? const GmScreen() : const ActorSelectScreen(),
+        builder: (_) =>
+            user.isGM ? const GmScreen() : const ActorSelectScreen(),
       ),
     );
   }
@@ -33,7 +34,9 @@ class UserSelectScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final world = ref.watch(selectedWorldProvider);
     if (world == null) {
-      return const Scaffold(body: Center(child: Text('No hay mundo seleccionado')));
+      return const Scaffold(
+        body: Center(child: Text('No hay mundo seleccionado')),
+      );
     }
     final usersAsync = ref.watch(worldUsersProvider(world.id));
 
@@ -61,13 +64,12 @@ class UserSelectScreen extends ConsumerWidget {
           // (PiBOT). El DM real sí se lista (entra a la vista de DM). Los GM van
           // primero.
           final hideRe = RegExp(r'^(party\d*|pibot)$', caseSensitive: false);
-          final users = allUsers
-              .where((u) => !hideRe.hasMatch(u.name.trim()))
-              .toList()
-            ..sort((a, b) {
-              if (a.isGM != b.isGM) return a.isGM ? -1 : 1;
-              return a.name.compareTo(b.name);
-            });
+          final users =
+              allUsers.where((u) => !hideRe.hasMatch(u.name.trim())).toList()
+                ..sort((a, b) {
+                  if (a.isGM != b.isGM) return a.isGM ? -1 : 1;
+                  return a.name.compareTo(b.name);
+                });
           if (users.isEmpty) {
             return _Centered(
               message: 'Este mundo no tiene jugadores.',
@@ -82,7 +84,9 @@ class UserSelectScreen extends ConsumerWidget {
               final user = users[i];
               return _RosterCard(
                 ring: _userColor(user),
-                initial: user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
+                initial: user.name.isNotEmpty
+                    ? user.name[0].toUpperCase()
+                    : '?',
                 title: user.name,
                 subtitle: user.isGM ? 'Game Master' : 'Jugador',
                 trailing: user.isGM
@@ -147,15 +151,23 @@ class _RosterCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title, style: cinzel(16, weight: FontWeight.w600)),
-                  Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.sub)),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(fontSize: 12, color: AppColors.sub),
+                  ),
                 ],
               ),
             ),
             if (trailing != null) trailing!,
             const SizedBox(width: 6),
-            const Text('Entrar ›',
-                style: TextStyle(
-                    fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.gold)),
+            const Text(
+              'Entrar ›',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: AppColors.gold,
+              ),
+            ),
           ],
         ),
       ),

@@ -17,7 +17,8 @@ class AppSettings {
 
   const AppSettings({this.autoRollDamage = true, this.keepScreenOn = false});
 
-  AppSettings copyWith({bool? autoRollDamage, bool? keepScreenOn}) => AppSettings(
+  AppSettings copyWith({bool? autoRollDamage, bool? keepScreenOn}) =>
+      AppSettings(
         autoRollDamage: autoRollDamage ?? this.autoRollDamage,
         keepScreenOn: keepScreenOn ?? this.keepScreenOn,
       );
@@ -40,7 +41,9 @@ class AppSettingsController extends Notifier<AppSettings> {
   void _applyWakelock(bool on) {
     try {
       WakelockPlus.toggle(enable: on);
-    } catch (_) {/* plataforma sin soporte */}
+    } catch (_) {
+      /* plataforma sin soporte */
+    }
   }
 
   Future<void> setAutoRollDamage(bool value) async {
@@ -56,4 +59,6 @@ class AppSettingsController extends Notifier<AppSettings> {
 }
 
 final appSettingsProvider =
-    NotifierProvider<AppSettingsController, AppSettings>(AppSettingsController.new);
+    NotifierProvider<AppSettingsController, AppSettings>(
+      AppSettingsController.new,
+    );

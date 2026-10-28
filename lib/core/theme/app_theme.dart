@@ -44,28 +44,37 @@ class AppColors {
 }
 
 /// Estilos Cinzel reutilizables (los números/títulos del diseño).
-TextStyle cinzel(double size, {Color color = AppColors.name, FontWeight weight = FontWeight.w700, double height = 1.15}) =>
-    GoogleFonts.cinzel(fontSize: size, fontWeight: weight, color: color, height: height);
+TextStyle cinzel(
+  double size, {
+  Color color = AppColors.name,
+  FontWeight weight = FontWeight.w700,
+  double height = 1.15,
+}) => GoogleFonts.cinzel(
+  fontSize: size,
+  fontWeight: weight,
+  color: color,
+  height: height,
+);
 
 ThemeData buildAppTheme() {
   final base = ThemeData(brightness: Brightness.dark, useMaterial3: true);
 
-  final scheme = ColorScheme.fromSeed(
-    seedColor: AppColors.gold,
-    brightness: Brightness.dark,
-  ).copyWith(
-    primary: AppColors.gold,
-    onPrimary: AppColors.bgAlt,
-    secondary: AppColors.orange,
-    surface: AppColors.panel,
-    onSurface: AppColors.parchment,
-    error: AppColors.red,
-  );
+  final scheme =
+      ColorScheme.fromSeed(
+        seedColor: AppColors.gold,
+        brightness: Brightness.dark,
+      ).copyWith(
+        primary: AppColors.gold,
+        onPrimary: AppColors.bgAlt,
+        secondary: AppColors.orange,
+        surface: AppColors.panel,
+        onSurface: AppColors.parchment,
+        error: AppColors.red,
+      );
 
-  final body = GoogleFonts.signikaTextTheme(base.textTheme).apply(
-    bodyColor: AppColors.parchment,
-    displayColor: AppColors.parchment,
-  );
+  final body = GoogleFonts.signikaTextTheme(
+    base.textTheme,
+  ).apply(bodyColor: AppColors.parchment, displayColor: AppColors.parchment);
 
   TextStyle cinzel(TextStyle? s, Color c) =>
       GoogleFonts.cinzel(textStyle: s, fontWeight: FontWeight.w600, color: c);
@@ -148,7 +157,8 @@ ThemeData buildAppTheme() {
       ),
     ),
     dividerColor: AppColors.border,
-    progressIndicatorTheme:
-        const ProgressIndicatorThemeData(color: AppColors.gold),
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+      color: AppColors.gold,
+    ),
   );
 }

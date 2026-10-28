@@ -28,5 +28,6 @@ class ReaderUrlController extends Notifier<String?> {
   }
 }
 
-final readerUrlProvider =
-    NotifierProvider<ReaderUrlController, String?>(ReaderUrlController.new);
+final readerUrlProvider = NotifierProvider<ReaderUrlController, String?>(
+  ReaderUrlController.new,
+);

@@ -1,7 +1,7 @@
 name: ffoundrycon
 description: "Companion app para Foundry VTT."
 publish_to: 'none'
-version: 2.1.0+11
+version: 2.1.1+12
 
 environment:
   sdk: ^3.9.0

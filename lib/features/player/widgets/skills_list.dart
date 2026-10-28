@@ -59,7 +59,14 @@ class _SkillRow extends ConsumerWidget {
           : () => rollAction(context, ref, RollKind.skill, s.key, s.label),
       onLongPress: edit
           ? null
-          : () => rollAction(context, ref, RollKind.skill, s.key, s.label, pick: true),
+          : () => rollAction(
+              context,
+              ref,
+              RollKind.skill,
+              s.key,
+              s.label,
+              pick: true,
+            ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
         decoration: BoxDecoration(
@@ -82,15 +89,23 @@ class _SkillRow extends ConsumerWidget {
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(s.label,
-                  style: const TextStyle(fontSize: 13.5, color: AppColors.listText)),
-            ),
-            Text(s.ability.toUpperCase(),
+              child: Text(
+                s.label,
                 style: const TextStyle(
-                    fontSize: 9,
-                    letterSpacing: .5,
-                    color: AppColors.label,
-                    fontWeight: FontWeight.w600)),
+                  fontSize: 13.5,
+                  color: AppColors.listText,
+                ),
+              ),
+            ),
+            Text(
+              s.ability.toUpperCase(),
+              style: const TextStyle(
+                fontSize: 9,
+                letterSpacing: .5,
+                color: AppColors.label,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             const SizedBox(width: 10),
             if (pendingTotal)
               const Padding(
@@ -99,10 +114,15 @@ class _SkillRow extends ConsumerWidget {
               ),
             SizedBox(
               width: 30,
-              child: Text(s.totalStr,
-                  textAlign: TextAlign.right,
-                  style: const TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.gold)),
+              child: Text(
+                s.totalStr,
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.gold,
+                ),
+              ),
             ),
           ],
         ),

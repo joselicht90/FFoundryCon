@@ -63,14 +63,21 @@ class SceneScaffold extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 3),
-                    Text(title,
-                        textAlign: TextAlign.center,
-                        style: cinzel(26, color: AppColors.name)),
+                    Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      style: cinzel(26, color: AppColors.name),
+                    ),
                     if (subtitle != null) ...[
                       const SizedBox(height: 3),
-                      Text(subtitle!,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 12, color: AppColors.label)),
+                      Text(
+                        subtitle!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.label,
+                        ),
+                      ),
                     ],
                   ],
                 ),

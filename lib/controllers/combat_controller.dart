@@ -45,7 +45,9 @@ class CombatController extends AsyncNotifier<FoundryCombat> {
     try {
       final fresh = await ref.read(foundryRepositoryProvider).getCombat();
       if (!_disposed) state = AsyncData(fresh);
-    } catch (_) {/* silencioso */}
+    } catch (_) {
+      /* silencioso */
+    }
   }
 
   Future<void> refresh() async {
@@ -68,12 +70,14 @@ class CombatController extends AsyncNotifier<FoundryCombat> {
 }
 
 final combatControllerProvider =
-    AsyncNotifierProvider<CombatController, FoundryCombat>(CombatController.new);
+    AsyncNotifierProvider<CombatController, FoundryCombat>(
+      CombatController.new,
+    );
 
 /// Hoja del actor de un combatiente (para el detalle del DM). Se recarga sola
 /// cuando cambia el combatiente seleccionado.
-final combatantActorProvider =
-    FutureProvider.family.autoDispose<FoundryActor, String>(
-  (ref, combatantId) =>
-      ref.read(foundryRepositoryProvider).getCombatantActor(combatantId),
-);
+final combatantActorProvider = FutureProvider.family
+    .autoDispose<FoundryActor, String>(
+      (ref, combatantId) =>
+          ref.read(foundryRepositoryProvider).getCombatantActor(combatantId),
+    );

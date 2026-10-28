@@ -19,15 +19,14 @@ class CombatScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final combat = ref.watch(combatControllerProvider).valueOrNull ??
+    final combat =
+        ref.watch(combatControllerProvider).valueOrNull ??
         const FoundryCombat();
     final actor = ref.watch(actorControllerProvider).valueOrNull;
     final isGM = ref.watch(selectedUserProvider)?.isGM ?? false;
 
     // Los jugadores no ven combatientes ocultos.
-    final list = combat.combatants
-        .where((c) => isGM || !c.hidden)
-        .toList();
+    final list = combat.combatants.where((c) => isGM || !c.hidden).toList();
     final myTurn = actor != null && combat.current?.actorId == actor.id;
 
     final body = !combat.active
@@ -61,23 +60,33 @@ class CombatScreen extends ConsumerWidget {
                       icon: const Icon(Icons.casino, size: 16),
                       label: const Text('Iniciativa'),
                       onPressed: () => rollAction(
-                          context, ref, RollKind.init, 'init', 'Iniciativa',
-                          pick: true),
+                        context,
+                        ref,
+                        RollKind.init,
+                        'init',
+                        'Iniciativa',
+                        pick: true,
+                      ),
                     ),
                   ],
                 ),
                 ...[
                   ...actor.items.where((i) => i.hasAttack),
                   ...actor.feats,
-                ].map((it) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: _ActionRow(item: it),
-                    )),
-                if (actor.items.every((i) => !i.hasAttack) && actor.feats.isEmpty)
+                ].map(
+                  (it) => Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: _ActionRow(item: it),
+                  ),
+                ),
+                if (actor.items.every((i) => !i.hasAttack) &&
+                    actor.feats.isEmpty)
                   const Padding(
                     padding: EdgeInsets.all(16),
-                    child: Text('Sin acciones de combate',
-                        style: TextStyle(color: AppColors.label)),
+                    child: Text(
+                      'Sin acciones de combate',
+                      style: TextStyle(color: AppColors.label),
+                    ),
                   ),
               ],
             ],
@@ -86,12 +95,15 @@ class CombatScreen extends ConsumerWidget {
     if (embedded) return body;
     return Scaffold(
       appBar: AppBar(
-        title: Text(combat.active ? 'Combate · Ronda ${combat.round}' : 'Combate'),
+        title: Text(
+          combat.active ? 'Combate · Ronda ${combat.round}' : 'Combate',
+        ),
         actions: [
           IconButton(
             tooltip: 'Refrescar',
             icon: const Icon(Icons.refresh),
-            onPressed: () => ref.read(combatControllerProvider.notifier).refresh(),
+            onPressed: () =>
+                ref.read(combatControllerProvider.notifier).refresh(),
           ),
         ],
       ),
@@ -119,8 +131,9 @@ class _DmTurnControlsState extends ConsumerState<_DmTurnControls> {
       await ref.read(combatControllerProvider.notifier).control(dir);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('No se pudo: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('No se pudo: $e')));
       }
     }
     if (mounted) setState(() => _busy = false);
@@ -135,15 +148,22 @@ class _DmTurnControlsState extends ConsumerState<_DmTurnControls> {
           Expanded(
             child: Column(
               children: [
-                Text('Ronda ${widget.round}',
-                    style: const TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.gold)),
+                Text(
+                  'Ronda ${widget.round}',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.gold,
+                  ),
+                ),
                 if (_busy)
                   const Padding(
                     padding: EdgeInsets.only(top: 4),
                     child: SizedBox(
-                        width: 14, height: 14,
-                        child: CircularProgressIndicator(strokeWidth: 2)),
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
                   ),
               ],
             ),
@@ -155,12 +175,12 @@ class _DmTurnControlsState extends ConsumerState<_DmTurnControls> {
   }
 
   Widget _btn(IconData ic, String tip, VoidCallback onTap) => IconButton(
-        tooltip: tip,
-        iconSize: 30,
-        color: AppColors.gold,
-        onPressed: _busy ? null : onTap,
-        icon: Icon(ic),
-      );
+    tooltip: tip,
+    iconSize: 30,
+    color: AppColors.gold,
+    onPressed: _busy ? null : onTap,
+    icon: Icon(ic),
+  );
 }
 
 /// Botón para terminar el turno propio (solo visible cuando es tu turno).
@@ -182,8 +202,9 @@ class _EndTurnButtonState extends ConsumerState<_EndTurnButton> {
       await ref.read(combatControllerProvider.notifier).endTurn(widget.actorId);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('No se pudo terminar el turno: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No se pudo terminar el turno: $e')),
+        );
       }
     }
     if (mounted) setState(() => _busy = false);
@@ -201,11 +222,17 @@ class _EndTurnButtonState extends ConsumerState<_EndTurnButton> {
           ? const SizedBox(
               width: 18,
               height: 18,
-              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.black,
+              ),
+            )
           : const Icon(Icons.skip_next),
       onPressed: _busy ? null : _end,
-      label: const Text('Terminar mi turno',
-          style: TextStyle(fontWeight: FontWeight.w800)),
+      label: const Text(
+        'Terminar mi turno',
+        style: TextStyle(fontWeight: FontWeight.w800),
+      ),
     );
   }
 }
@@ -215,11 +242,12 @@ class _CombatantRow extends ConsumerWidget {
   final bool isCurrent;
   final bool isMine;
   final bool showHp;
-  const _CombatantRow(
-      {required this.combatant,
-      required this.isCurrent,
-      required this.isMine,
-      this.showHp = true});
+  const _CombatantRow({
+    required this.combatant,
+    required this.isCurrent,
+    required this.isMine,
+    this.showHp = true,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -250,9 +278,10 @@ class _CombatantRow extends ConsumerWidget {
                 c.initiative == null ? '—' : '${c.initiative!.round()}',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: isCurrent ? AppColors.gold : AppColors.label),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: isCurrent ? AppColors.gold : AppColors.label,
+                ),
               ),
             ),
             const SizedBox(width: 8),
@@ -263,14 +292,22 @@ class _CombatantRow extends ConsumerWidget {
                 shape: BoxShape.circle,
                 color: color.withAlpha(40),
                 image: url != null
-                    ? DecorationImage(image: NetworkImage(url), fit: BoxFit.cover)
+                    ? DecorationImage(
+                        image: NetworkImage(url),
+                        fit: BoxFit.cover,
+                      )
                     : null,
                 border: Border.all(color: color, width: 1.5),
               ),
               alignment: Alignment.center,
               child: url == null
-                  ? Text(c.name.isNotEmpty ? c.name[0].toUpperCase() : '?',
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
+                  ? Text(
+                      c.name.isNotEmpty ? c.name[0].toUpperCase() : '?',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
                   : null,
             ),
             const SizedBox(width: 10),
@@ -281,25 +318,38 @@ class _CombatantRow extends ConsumerWidget {
                   Row(
                     children: [
                       Flexible(
-                        child: Text(c.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
-                                color: AppColors.listText)),
+                        child: Text(
+                          c.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: isCurrent
+                                ? FontWeight.w800
+                                : FontWeight.w600,
+                            color: AppColors.listText,
+                          ),
+                        ),
                       ),
                       if (isMine) ...[
                         const SizedBox(width: 6),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 1,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.gold.withAlpha(40),
                             borderRadius: BorderRadius.circular(5),
                           ),
-                          child: const Text('VOS',
-                              style: TextStyle(
-                                  fontSize: 9, fontWeight: FontWeight.w800, color: AppColors.gold)),
+                          child: const Text(
+                            'VOS',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.gold,
+                            ),
+                          ),
                         ),
                       ],
                     ],
@@ -352,8 +402,10 @@ class _HpBar extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 7),
-        Text('${hp.value}/${hp.max}',
-            style: const TextStyle(fontSize: 10, color: AppColors.label)),
+        Text(
+          '${hp.value}/${hp.max}',
+          style: const TextStyle(fontSize: 10, color: AppColors.label),
+        ),
       ],
     );
   }
@@ -375,17 +427,20 @@ class _ActionRow extends ConsumerWidget {
       padding: EdgeInsets.zero,
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
-        onTap: () => showActionInfoDialog(context, ref,
-            itemId: item.id,
-            name: item.name,
-            meta: meta,
-            description: item.description,
-            hasAttack: item.hasAttack,
-            hasDamage: item.damage != null,
-            canUse: item.canUse,
-            needsTargets: item.needsTargets,
-            hasResource: item.uses != null,
-            activities: item.activities),
+        onTap: () => showActionInfoDialog(
+          context,
+          ref,
+          itemId: item.id,
+          name: item.name,
+          meta: meta,
+          description: item.description,
+          hasAttack: item.hasAttack,
+          hasDamage: item.damage != null,
+          canUse: item.canUse,
+          needsTargets: item.needsTargets,
+          hasResource: item.uses != null,
+          activities: item.activities,
+        ),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
           child: Row(
@@ -394,25 +449,38 @@ class _ActionRow extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(item.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.listText)),
+                    Text(
+                      item.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.listText,
+                      ),
+                    ),
                     if (meta.isNotEmpty)
-                      Text(meta,
-                          style: const TextStyle(fontSize: 11, color: AppColors.label)),
+                      Text(
+                        meta,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.label,
+                        ),
+                      ),
                   ],
                 ),
               ),
               if (item.uses != null)
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
-                  child: Text('${item.uses!.value}/${item.uses!.max}',
-                      style: const TextStyle(
-                          fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.gold)),
+                  child: Text(
+                    '${item.uses!.value}/${item.uses!.max}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.gold,
+                    ),
+                  ),
                 ),
               const Icon(Icons.chevron_right, size: 20, color: AppColors.gold),
             ],
@@ -433,16 +501,23 @@ class _NoCombat extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.shield_moon_outlined, size: 48, color: AppColors.label),
+          const Icon(
+            Icons.shield_moon_outlined,
+            size: 48,
+            color: AppColors.label,
+          ),
           const SizedBox(height: 12),
-          const Text('No hay combate activo',
-              style: TextStyle(color: AppColors.label)),
+          const Text(
+            'No hay combate activo',
+            style: TextStyle(color: AppColors.label),
+          ),
           const SizedBox(height: 4),
           Text(
-              isGM
-                  ? 'Iniciá un combate desde Foundry y aparecerá acá'
-                  : 'Aparecerá acá cuando el GM inicie uno',
-              style: const TextStyle(fontSize: 12, color: AppColors.muted)),
+            isGM
+                ? 'Iniciá un combate desde Foundry y aparecerá acá'
+                : 'Aparecerá acá cuando el GM inicie uno',
+            style: const TextStyle(fontSize: 12, color: AppColors.muted),
+          ),
         ],
       ),
     );

@@ -13,7 +13,11 @@ import '../player/widgets/actor_avatar.dart';
 class DmDashboard extends ConsumerWidget {
   const DmDashboard({super.key});
 
-  Future<void> _open(BuildContext context, WidgetRef ref, String actorId) async {
+  Future<void> _open(
+    BuildContext context,
+    WidgetRef ref,
+    String actorId,
+  ) async {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -22,9 +26,9 @@ class DmDashboard extends ConsumerWidget {
     await ref.read(actorControllerProvider.notifier).load(actorId);
     if (!context.mounted) return;
     Navigator.of(context).pop();
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const PlayerScreen()),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const PlayerScreen()));
   }
 
   @override
@@ -34,33 +38,43 @@ class DmDashboard extends ConsumerWidget {
       onRefresh: () => ref.read(dmPartyProvider.notifier).refresh(),
       child: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => ListView(children: [
-          const SizedBox(height: 80),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text('No se pudieron cargar los personajes.\n$e',
+        error: (e, _) => ListView(
+          children: [
+            const SizedBox(height: 80),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  'No se pudieron cargar los personajes.\n$e',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(color: AppColors.label)),
+                  style: const TextStyle(color: AppColors.label),
+                ),
+              ),
             ),
-          ),
-          Center(
-            child: FilledButton(
-              onPressed: () => ref.read(dmPartyProvider.notifier).refresh(),
-              child: const Text('Reintentar'),
+            Center(
+              child: FilledButton(
+                onPressed: () => ref.read(dmPartyProvider.notifier).refresh(),
+                child: const Text('Reintentar'),
+              ),
             ),
-          ),
-        ]),
+          ],
+        ),
         data: (actors) {
           if (actors.isEmpty) {
             return const Center(
-                child: Text('Sin personajes', style: TextStyle(color: AppColors.label)));
+              child: Text(
+                'Sin personajes',
+                style: TextStyle(color: AppColors.label),
+              ),
+            );
           }
           return LayoutBuilder(
             builder: (ctx, cons) {
               // Landscape/tablet: 2 columnas; portrait: 1.
               final wide = cons.maxWidth >= 640;
-              final cardW = wide ? (cons.maxWidth - 24 - 10) / 2 : cons.maxWidth - 24;
+              final cardW = wide
+                  ? (cons.maxWidth - 24 - 10) / 2
+                  : cons.maxWidth - 24;
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(12),
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -124,21 +138,32 @@ class _PartyCard extends StatelessWidget {
                         Row(
                           children: [
                             Flexible(
-                              child: Text(actor.name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: cinzel(15, weight: FontWeight.w600)),
+                              child: Text(
+                                actor.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: cinzel(15, weight: FontWeight.w600),
+                              ),
                             ),
                             if (actor.inspiration) ...[
                               const SizedBox(width: 6),
-                              const Icon(Icons.star, size: 15, color: AppColors.gold),
+                              const Icon(
+                                Icons.star,
+                                size: 15,
+                                color: AppColors.gold,
+                              ),
                             ],
                           ],
                         ),
-                        Text(actor.classLine,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 11, color: AppColors.sub)),
+                        Text(
+                          actor.classLine,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.sub,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -165,7 +190,10 @@ class _PartyCard extends StatelessWidget {
                   Text(
                     '${hp.value}/${hp.max}${hp.temp > 0 ? ' +${hp.temp}' : ''}',
                     style: const TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.listText),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.listText,
+                    ),
                   ),
                 ],
               ),
@@ -179,14 +207,24 @@ class _PartyCard extends StatelessWidget {
                     children: [
                       for (final e in actor.effects)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.orange.withAlpha(28),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppColors.orange.withAlpha(90)),
+                            border: Border.all(
+                              color: AppColors.orange.withAlpha(90),
+                            ),
                           ),
-                          child: Text(e.name,
-                              style: const TextStyle(fontSize: 10, color: AppColors.orange)),
+                          child: Text(
+                            e.name,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: AppColors.orange,
+                            ),
+                          ),
                         ),
                     ],
                   ),
@@ -209,10 +247,18 @@ class _MiniStat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(value,
-            style: const TextStyle(
-                fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.gold)),
-        Text(label, style: const TextStyle(fontSize: 9, color: AppColors.label)),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
+            color: AppColors.gold,
+          ),
+        ),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 9, color: AppColors.label),
+        ),
       ],
     );
   }

@@ -49,6 +49,10 @@ class ProfDot extends StatelessWidget {
     if (level > 0) {
       return Icon(Icons.circle, size: size * 0.85, color: AppColors.orange);
     }
-    return Icon(Icons.circle_outlined, size: size * 0.85, color: Colors.grey.shade600);
+    return Icon(
+      Icons.circle_outlined,
+      size: size * 0.85,
+      color: Colors.grey.shade600,
+    );
   }
 }

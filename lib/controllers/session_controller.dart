@@ -10,10 +10,10 @@ final worldsProvider = FutureProvider.autoDispose<List<FoundryWorld>>(
 );
 
 /// Usuarios de un mundo, leídos de su LevelDB.
-final worldUsersProvider =
-    FutureProvider.autoDispose.family<List<FoundryUser>, String>(
-  (ref, worldId) => ref.watch(foundryRepositoryProvider).getUsers(worldId),
-);
+final worldUsersProvider = FutureProvider.autoDispose
+    .family<List<FoundryUser>, String>(
+      (ref, worldId) => ref.watch(foundryRepositoryProvider).getUsers(worldId),
+    );
 
 /// Mundo elegido por el usuario.
 class SelectedWorldController extends Notifier<FoundryWorld?> {
@@ -26,8 +26,8 @@ class SelectedWorldController extends Notifier<FoundryWorld?> {
 
 final selectedWorldProvider =
     NotifierProvider<SelectedWorldController, FoundryWorld?>(
-  SelectedWorldController.new,
-);
+      SelectedWorldController.new,
+    );
 
 /// Usuario (jugador o GM) elegido dentro del mundo.
 class SelectedUserController extends Notifier<FoundryUser?> {
@@ -40,5 +40,5 @@ class SelectedUserController extends Notifier<FoundryUser?> {
 
 final selectedUserProvider =
     NotifierProvider<SelectedUserController, FoundryUser?>(
-  SelectedUserController.new,
-);
+      SelectedUserController.new,
+    );

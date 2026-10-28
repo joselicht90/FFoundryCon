@@ -149,17 +149,21 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     // El mapa abre en pantalla aparte: sus gestos (pan/zoom/drag) no conviven
     // con el swipe horizontal del PageView.
     if (navIndex == _mapIndex) {
-      final offline = ref.read(actorControllerProvider).valueOrNull?.offline ?? false;
+      final offline =
+          ref.read(actorControllerProvider).valueOrNull?.offline ?? false;
       if (offline) return; // mapa requiere Foundry online
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const MapScreen()),
-      );
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const MapScreen()));
       return;
     }
     final page = navIndex < _mapIndex ? navIndex : navIndex - 1;
     setState(() => _page = page);
-    _pc.animateToPage(page,
-        duration: const Duration(milliseconds: 250), curve: Curves.easeOut);
+    _pc.animateToPage(
+      page,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOut,
+    );
   }
 
   @override
@@ -238,9 +242,18 @@ class _Header extends ConsumerWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.chevron_left, size: 18, color: AppColors.label),
-                  Text(world?.title ?? 'Volver',
-                      style: const TextStyle(fontSize: 12, color: AppColors.label)),
+                  const Icon(
+                    Icons.chevron_left,
+                    size: 18,
+                    color: AppColors.label,
+                  ),
+                  Text(
+                    world?.title ?? 'Volver',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.label,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -253,41 +266,59 @@ class _Header extends ConsumerWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(color: AppColors.gold.withAlpha(128)),
-                  boxShadow: [BoxShadow(color: AppColors.gold.withAlpha(26), blurRadius: 6)],
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.gold.withAlpha(26),
+                      blurRadius: 6,
+                    ),
+                  ],
                 ),
                 child: ActorAvatar(
-                    img: actor?.img, name: actor?.name ?? '?', radius: 20),
+                  img: actor?.img,
+                  name: actor?.name ?? '?',
+                  radius: 20,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(actor?.name ?? 'Jugador',
-                        style: cinzel(18, weight: FontWeight.w600, height: 1.1)),
+                    Text(
+                      actor?.name ?? 'Jugador',
+                      style: cinzel(18, weight: FontWeight.w600, height: 1.1),
+                    ),
                     if (actor != null)
                       Text(
-                        [actor!.classLine, if (actor!.level != null) 'Nivel ${actor!.level}']
-                            .where((s) => s.isNotEmpty)
-                            .join(' • '),
-                        style: const TextStyle(fontSize: 12, color: AppColors.sub),
+                        [
+                          actor!.classLine,
+                          if (actor!.level != null) 'Nivel ${actor!.level}',
+                        ].where((s) => s.isNotEmpty).join(' • '),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.sub,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                   ],
                 ),
               ),
-              if (actor != null && !actor!.offline) _LongRestButton(actorName: actor!.name),
+              if (actor != null && !actor!.offline)
+                _LongRestButton(actorName: actor!.name),
               IconButton(
                 tooltip: 'Reglas',
                 icon: const Icon(Icons.gavel, color: AppColors.gold),
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const RulesScreen()),
-                ),
+                onPressed: () => Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (_) => const RulesScreen())),
               ),
               IconButton(
                 tooltip: 'Compendio',
-                icon: const Icon(Icons.menu_book_outlined, color: AppColors.gold),
+                icon: const Icon(
+                  Icons.menu_book_outlined,
+                  color: AppColors.gold,
+                ),
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const CompendiumScreen()),
                 ),
@@ -317,9 +348,9 @@ class _CombatBanner extends ConsumerWidget {
     return Material(
       color: color.withAlpha(myTurn ? 46 : 28),
       child: InkWell(
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const CombatScreen()),
-        ),
+        onTap: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const CombatScreen())),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(14, 7, 10, 7),
           child: Row(
@@ -334,12 +365,20 @@ class _CombatBanner extends ConsumerWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                      fontSize: 12.5, fontWeight: FontWeight.w700, color: color),
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: color,
+                  ),
                 ),
               ),
-              Text('Ver',
-                  style: TextStyle(
-                      fontSize: 11, fontWeight: FontWeight.w700, color: color)),
+              Text(
+                'Ver',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: color,
+                ),
+              ),
               Icon(Icons.chevron_right, size: 16, color: color),
             ],
           ),
@@ -361,7 +400,9 @@ class _RollToaster {
       Overlay.of(context, rootOverlay: true).insert(_entry!);
     }
     // El estado puede no estar montado en el primer frame tras insertar.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _key.currentState?.add(m));
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _key.currentState?.add(m),
+    );
   }
 
   void dispose() {
@@ -408,7 +449,11 @@ class _RollToastLayerState extends State<_RollToastLayer> {
         mainAxisSize: MainAxisSize.min,
         children: [
           for (final m in _toasts)
-            _RollToast(key: ValueKey(m.id), msg: m, onDismiss: () => _dismiss(m.id)),
+            _RollToast(
+              key: ValueKey(m.id),
+              msg: m,
+              onDismiss: () => _dismiss(m.id),
+            ),
         ],
       ),
     );
@@ -497,14 +542,18 @@ class _LongRestButtonState extends ConsumerState<_LongRestButton> {
         backgroundColor: AppColors.bgAlt,
         title: const Text('Descanso largo'),
         content: Text(
-            'Se restauran PV, dados de golpe, usos y espacios de conjuro de ${widget.actorName}.'),
+          'Se restauran PV, dados de golpe, usos y espacios de conjuro de ${widget.actorName}.',
+        ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancelar')),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
           FilledButton(
             style: FilledButton.styleFrom(
-                backgroundColor: AppColors.gold, foregroundColor: Colors.black),
+              backgroundColor: AppColors.gold,
+              foregroundColor: Colors.black,
+            ),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Descansar'),
           ),
@@ -522,8 +571,9 @@ class _LongRestButtonState extends ConsumerState<_LongRestButton> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('No se pudo descansar: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('No se pudo descansar: $e')));
       }
     }
     if (mounted) setState(() => _busy = false);
@@ -537,7 +587,11 @@ class _LongRestButtonState extends ConsumerState<_LongRestButton> {
           ? const SizedBox(
               width: 20,
               height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.gold))
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppColors.gold,
+              ),
+            )
           : const Icon(Icons.bedtime_outlined, color: AppColors.gold),
       onPressed: _busy ? null : _rest,
     );
@@ -548,8 +602,11 @@ class _BottomNav extends StatelessWidget {
   final int current;
   final ValueChanged<int> onTap;
   final bool offline;
-  const _BottomNav(
-      {required this.current, required this.onTap, this.offline = false});
+  const _BottomNav({
+    required this.current,
+    required this.onTap,
+    this.offline = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -580,9 +637,14 @@ class _BottomNav extends StatelessWidget {
                     children: [
                       Icon(_navItems[i].icon, size: 22, color: color),
                       const SizedBox(height: 4),
-                      Text(_navItems[i].label,
-                          style: TextStyle(
-                              fontSize: 9, fontWeight: FontWeight.w600, color: color)),
+                      Text(
+                        _navItems[i].label,
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w600,
+                          color: color,
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -633,13 +695,20 @@ class _OfflineBannerState extends ConsumerState<_OfflineBanner> {
                 ? const Padding(
                     padding: EdgeInsets.all(10),
                     child: SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2, color: AppColors.orange)),
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.orange,
+                      ),
+                    ),
                   )
                 : IconButton(
-                    icon: const Icon(Icons.refresh, size: 18, color: AppColors.orange),
+                    icon: const Icon(
+                      Icons.refresh,
+                      size: 18,
+                      color: AppColors.orange,
+                    ),
                     tooltip: 'Reintentar conexión',
                     onPressed: _retry,
                   ),

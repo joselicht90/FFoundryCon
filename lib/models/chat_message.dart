@@ -5,9 +5,9 @@ class DamageTarget {
   const DamageTarget({required this.tokenId, required this.name});
 
   factory DamageTarget.fromJson(Map<String, dynamic> j) => DamageTarget(
-        tokenId: j['tokenId'] as String? ?? '',
-        name: j['name'] as String? ?? '?',
-      );
+    tokenId: j['tokenId'] as String? ?? '',
+    name: j['name'] as String? ?? '?',
+  );
 }
 
 /// Datos para el botón "Aplicar daño" del DM (viene con el roll de daño de Midi).
@@ -23,17 +23,17 @@ class ApplyDamage {
   });
 
   factory ApplyDamage.fromJson(Map<String, dynamic> j) => ApplyDamage(
-        total: (j['total'] as num?)?.toInt() ?? 0,
-        targets: (j['targets'] as List?)
-                ?.whereType<Map<String, dynamic>>()
-                .map(DamageTarget.fromJson)
-                .toList() ??
-            const [],
-        damages: (j['damages'] as List?)
-                ?.whereType<Map<String, dynamic>>()
-                .toList() ??
-            const [],
-      );
+    total: (j['total'] as num?)?.toInt() ?? 0,
+    targets:
+        (j['targets'] as List?)
+            ?.whereType<Map<String, dynamic>>()
+            .map(DamageTarget.fromJson)
+            .toList() ??
+        const [],
+    damages:
+        (j['damages'] as List?)?.whereType<Map<String, dynamic>>().toList() ??
+        const [],
+  );
 }
 
 /// Mensaje del chat. Se construye tanto del shape normalizado (`GET /api/chat`)
@@ -52,8 +52,10 @@ class ChatMessage {
   final bool isOoc;
   final bool isSystem;
   final String? userId;
+
   /// Ids de usuario destinatarios. Vacío = público.
   final List<String> whisper;
+
   /// Datos del botón "Aplicar daño" del DM (null si no aplica).
   final ApplyDamage? applyDamage;
   final int timestamp;
@@ -118,27 +120,28 @@ class ChatMessage {
 
   /// Shape normalizado del reader (`GET /api/chat`).
   factory ChatMessage.fromNormalized(Map<String, dynamic> j) => ChatMessage(
-        id: j['id'] as String? ?? '${j['timestamp']}',
-        source: j['source'] as String? ?? 'foundry',
-        author: j['author'] as String? ?? '?',
-        authorColor: j['authorColor'] as String?,
-        isRoll: j['isRoll'] as bool? ?? false,
-        flavor: _cleanFlavor(j['flavor'] as String?),
-        formula: j['formula'] as String?,
-        total: _intOf(j['total']),
-        dice: _ints(j['dice']),
-        text: j['text'] as String?,
-        isOoc: j['isOoc'] as bool? ?? false,
-        isSystem: j['isSystem'] as bool? ?? false,
-        userId: j['userId'] as String?,
-        whisper: _strs(j['whisper']),
-        applyDamage: _apply(j['applyDamage']),
-        timestamp: _intOf(j['timestamp']) ?? 0,
-      );
+    id: j['id'] as String? ?? '${j['timestamp']}',
+    source: j['source'] as String? ?? 'foundry',
+    author: j['author'] as String? ?? '?',
+    authorColor: j['authorColor'] as String?,
+    isRoll: j['isRoll'] as bool? ?? false,
+    flavor: _cleanFlavor(j['flavor'] as String?),
+    formula: j['formula'] as String?,
+    total: _intOf(j['total']),
+    dice: _ints(j['dice']),
+    text: j['text'] as String?,
+    isOoc: j['isOoc'] as bool? ?? false,
+    isSystem: j['isSystem'] as bool? ?? false,
+    userId: j['userId'] as String?,
+    whisper: _strs(j['whisper']),
+    applyDamage: _apply(j['applyDamage']),
+    timestamp: _intOf(j['timestamp']) ?? 0,
+  );
 
   /// Entry crudo que llega por WS (`data` de `{type, data}`).
   factory ChatMessage.fromIngest(Map<String, dynamic> e) {
-    final rolls = (e['rolls'] as List?)?.cast<Map<String, dynamic>>() ?? const [];
+    final rolls =
+        (e['rolls'] as List?)?.cast<Map<String, dynamic>>() ?? const [];
     final isRoll = rolls.isNotEmpty;
     final roll = isRoll ? rolls.first : null;
     final speaker = e['speaker'] as Map<String, dynamic>?;
@@ -153,13 +156,16 @@ class ChatMessage {
       formula: roll?['formula'] as String?,
       total: _intOf(roll?['total']),
       dice: _ints(roll?['values']),
-      text: isRoll ? null : _strip(e['content'] as String? ?? e['text'] as String?),
+      text: isRoll
+          ? null
+          : _strip(e['content'] as String? ?? e['text'] as String?),
       isOoc: e['ooc'] == true || type == 2,
       isSystem: type == 4,
       userId: e['userId'] as String?,
       whisper: _strs(e['whisper']),
       applyDamage: _apply(e['applyDamage']),
-      timestamp: _intOf(e['timestamp']) ?? DateTime.now().millisecondsSinceEpoch,
+      timestamp:
+          _intOf(e['timestamp']) ?? DateTime.now().millisecondsSinceEpoch,
     );
   }
 }

@@ -41,3 +41,28 @@ core -> repositories -> controllers -> features
   payload fields, error codes, threading, supported-platform behavior,
   verification) in `docs/engineering/` before changing native or Dart sides
   of it.
+
+## Foundry WebView adapter
+
+The player's "Foundry" tab (`lib/features/player/pages/foundry_sheet_page.dart`)
+loads the real Foundry client — not the reader — so sheets and MidiQOL run
+exactly as in a browser. Contract:
+
+- **URL**: `foundryUrlProvider` (`lib/core/network/foundry_url_provider.dart`),
+  user-configured in Settings, `https` only, no default. The page loads
+  `<url>/join`; the player logs in through Foundry's own form. The app never
+  reads or stores the password; the session lives in the platform WebView
+  cookie store.
+- **Navigation**: only the Foundry origin (and `about:blank`) is allowed;
+  everything else is blocked by the `NavigationDelegate`.
+- **Injection**: after every page load the app runs
+  `assets/foundry_mobile/adapter.js` wrapped as
+  `(() => { const FFC = {actorId, css}; ... })()`. The adapter sets the
+  `core.noCanvas` client setting in `localStorage` (reloading `/game` once if
+  it was off), injects `adapter.css`, and on `/game` opens the actor's sheet
+  full screen with a floating toggle for Foundry's chat sidebar. It is
+  idempotent and has no JS→Dart channel.
+- No canvas means no token targets: MidiQOL attacks from this tab do not
+  auto-apply damage.
+- CSS selectors and the `localStorage` key depend on the Foundry/dnd5e
+  version; adjust the assets, not Dart code, when they change.

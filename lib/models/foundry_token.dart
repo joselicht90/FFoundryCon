@@ -68,34 +68,8 @@ class FoundryToken {
 
   bool ownedBy(String userId) => ownerIds.contains(userId);
 
-  FoundryToken copyWith({double? x, double? y}) => FoundryToken(
-    id: id,
-    name: name,
-    x: x ?? this.x,
-    y: y ?? this.y,
-    gw: gw,
-    gh: gh,
-    actorId: actorId,
-    img: img,
-    hidden: hidden,
-    disposition: disposition,
-    ownerIds: ownerIds,
-    vision: vision,
-    sightRadius: sightRadius,
-  );
-
   factory FoundryToken.fromJson(Map<String, dynamic> json) =>
       _$FoundryTokenFromJson(json);
 
   Map<String, dynamic> toJson() => _$FoundryTokenToJson(this);
-}
-
-/// Direcciones de movimiento por casilla.
-enum StepDirection {
-  up,
-  down,
-  left,
-  right;
-
-  String get wire => name;
 }

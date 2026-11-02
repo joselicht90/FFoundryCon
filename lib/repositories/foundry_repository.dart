@@ -44,10 +44,7 @@ abstract class FoundryRepository {
 
   Future<List<FoundryWorld>> getWorlds();
   Future<List<FoundryUser>> getUsers(String worldId);
-  Future<List<FoundryToken>> getTokens();
   Future<({FoundryScene? scene, List<FoundryToken> tokens})> getMap();
-  Future<void> stepToken(String tokenId, StepDirection direction, {int spaces});
-  Future<void> moveToken(String tokenId, num x, num y);
   Future<void> setTargets(List<String> tokenIds);
   Future<void> sendRoll(RollRequest roll);
 
@@ -197,15 +194,6 @@ class DioFoundryRepository implements FoundryRepository {
   }
 
   @override
-  Future<List<FoundryToken>> getTokens() async {
-    final res = await _dio.get('/api/tokens');
-    final data = res.data as Map<String, dynamic>;
-    final tokens =
-        (data['tokens'] as List?)?.cast<Map<String, dynamic>>() ?? [];
-    return tokens.map(FoundryToken.fromJson).toList();
-  }
-
-  @override
   Future<({FoundryScene? scene, List<FoundryToken> tokens})> getMap() async {
     final res = await _dio.get('/api/tokens');
     final data = res.data as Map<String, dynamic>;
@@ -215,18 +203,6 @@ class DioFoundryRepository implements FoundryRepository {
     return (
       scene: sceneJson != null ? FoundryScene.fromJson(sceneJson) : null,
       tokens: tokens.map(FoundryToken.fromJson).toList(),
-    );
-  }
-
-  @override
-  Future<void> stepToken(
-    String tokenId,
-    StepDirection direction, {
-    int spaces = 1,
-  }) async {
-    await _dio.post(
-      '/api/tokens/$tokenId/step',
-      data: {'direction': direction.wire, 'spaces': spaces},
     );
   }
 
@@ -268,14 +244,6 @@ class DioFoundryRepository implements FoundryRepository {
       data: {'changes': changes},
     );
     return FoundryActor.fromJson(res.data as Map<String, dynamic>);
-  }
-
-  @override
-  Future<void> moveToken(String tokenId, num x, num y) async {
-    await _dio.post(
-      '/api/tokens/$tokenId/move',
-      data: {'x': x.round(), 'y': y.round()},
-    );
   }
 
   @override

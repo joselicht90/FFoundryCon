@@ -16,8 +16,8 @@ import '../../models/foundry_combat.dart';
 import 'combat_screen.dart';
 import '../rules/rules_screen.dart';
 import 'compendium_screen.dart';
-import 'map_screen.dart';
 import 'pages/chat_page.dart';
+import 'pages/foundry_sheet_page.dart';
 import 'pages/skills_page.dart';
 import 'pages/summary_page.dart';
 import 'widgets/actor_avatar.dart';
@@ -37,11 +37,11 @@ const _navItems = [
   _NavItem(Icons.format_list_bulleted, 'Skills'),
   _NavItem(Icons.auto_awesome, 'Spells'),
   _NavItem(Icons.backpack_outlined, 'Items'),
-  _NavItem(Icons.grid_view, 'Map'),
   _NavItem(Icons.forum_outlined, 'Chat'),
+  _NavItem(Icons.public, 'Foundry'),
 ];
 
-const _mapIndex = 4; // el mapa requiere Foundry online
+const _foundryIndex = 5; // hoja real de Foundry en WebView
 
 class PlayerScreen extends ConsumerStatefulWidget {
   const PlayerScreen({super.key});
@@ -145,19 +145,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     super.dispose();
   }
 
-  void _go(int navIndex) {
-    // El mapa abre en pantalla aparte: sus gestos (pan/zoom/drag) no conviven
-    // con el swipe horizontal del PageView.
-    if (navIndex == _mapIndex) {
-      final offline =
-          ref.read(actorControllerProvider).valueOrNull?.offline ?? false;
-      if (offline) return; // mapa requiere Foundry online
-      Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => const MapScreen()));
-      return;
-    }
-    final page = navIndex < _mapIndex ? navIndex : navIndex - 1;
+  void _go(int page) {
     setState(() => _page = page);
     _pc.animateToPage(
       page,
@@ -190,6 +178,10 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                 }
                 return PageView(
                   controller: _pc,
+                  // En la hoja de Foundry el swipe no compite con sus gestos.
+                  physics: _page == _foundryIndex
+                      ? const NeverScrollableScrollPhysics()
+                      : null,
                   onPageChanged: (i) => setState(() => _page = i),
                   children: [
                     SummaryPage(actor: a),
@@ -197,6 +189,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                     SpellsList(actor: a),
                     InventoryList(actor: a),
                     const ChatPage(),
+                    FoundrySheetPage(actorId: a.id),
                   ],
                 );
               },
@@ -205,8 +198,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
         ],
       ),
       bottomNavigationBar: _BottomNav(
-        // _page no incluye el mapa (pantalla aparte); mapeo a índice de nav.
-        current: _page < _mapIndex ? _page : _page + 1,
+        current: _page,
         onTap: _go,
         offline: actor?.offline ?? false,
       ),
@@ -626,7 +618,7 @@ class _BottomNav extends StatelessWidget {
           for (int i = 0; i < _navItems.length; i++)
             Expanded(
               child: () {
-                final disabled = i == _mapIndex && offline;
+                final disabled = i == _foundryIndex && offline;
                 final color = disabled
                     ? AppColors.muted.withAlpha(70)
                     : (i == current ? AppColors.gold : AppColors.muted);

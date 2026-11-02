@@ -1,0 +1,83 @@
+/* Layout móvil para Foundry VTT (v12 y v13). Inyectado por adapter.js. */
+
+/* UI de mesa que no aplica en el teléfono. */
+body.ffc-mobile #ui-left,
+body.ffc-mobile #ui-top,
+body.ffc-mobile #ui-bottom,
+body.ffc-mobile #navigation,
+body.ffc-mobile #controls,
+body.ffc-mobile #hotbar,
+body.ffc-mobile #players,
+body.ffc-mobile #scene-controls,
+body.ffc-mobile #scene-navigation {
+  display: none !important;
+}
+
+/* Sidebar (chat) oculto salvo que se abra con el botón flotante. */
+body.ffc-mobile #ui-right,
+body.ffc-mobile #sidebar {
+  display: none !important;
+}
+body.ffc-mobile.ffc-chat-open #ui-right,
+body.ffc-mobile.ffc-chat-open #sidebar {
+  display: flex !important;
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  margin: 0 !important;
+  z-index: 50 !important;
+}
+body.ffc-mobile.ffc-chat-open #sidebar {
+  flex-direction: column;
+}
+/* Con el chat abierto se ocultan las hojas; los diálogos (p.ej. tirada de daño
+   desde una tarjeta de MidiQOL) siguen apareciendo encima del chat. */
+body.ffc-mobile.ffc-chat-open .window-app.sheet,
+body.ffc-mobile.ffc-chat-open .application.sheet {
+  visibility: hidden !important;
+}
+
+/* Hojas de actor/item: pantalla completa, sin marco de ventana. */
+body.ffc-mobile .window-app.sheet,
+body.ffc-mobile .application.sheet {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  transform: none !important;
+  border-radius: 0 !important;
+}
+
+/* Diálogos (configuración de tirada, MidiQOL, etc.): ancho completo. */
+body.ffc-mobile .window-app:not(.sheet),
+body.ffc-mobile .application:not(.sheet) {
+  left: 8px !important;
+  width: calc(100vw - 16px) !important;
+  max-width: none !important;
+  max-height: calc(100vh - 16px) !important;
+  transform: none !important;
+}
+
+body.ffc-mobile .window-resizable-handle,
+body.ffc-mobile .window-resize-handle {
+  display: none !important;
+}
+
+#ffc-chat-toggle {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: 10001;
+  width: auto;
+  padding: 10px 16px;
+  border-radius: 20px;
+  border: 1px solid #c9a86a;
+  background: #1a1b1f;
+  color: #c9a86a;
+  font-size: 14px;
+  line-height: 1;
+}

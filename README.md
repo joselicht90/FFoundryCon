@@ -1,7 +1,9 @@
 # FFoundryCon
 
-App Flutter companion para Foundry VTT (D&D 5e) — hoja de personaje, tiradas,
-D-pad de tokens y chat en vivo, incluso sin la tab del GM abierta.
+App Flutter companion para Foundry VTT (D&D 5e) — hoja de personaje, tiradas
+y chat en vivo, incluso sin la tab del GM abierta. La tab **Foundry** carga la
+hoja real de Foundry (con MidiQOL) en una WebView adaptada a móvil; requiere
+configurar la URL de Foundry en Configuración y loguearse como el jugador.
 
 Parte de un sistema de 4 componentes ([detalle completo](https://github.com/joselicht90/foundry-data-reader/blob/main/CLAUDE.md)):
 

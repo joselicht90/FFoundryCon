@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../controllers/connection_controller.dart';
+import '../../core/network/foundry_url_provider.dart';
 import '../../core/network/reader_url_provider.dart';
 import '../../core/settings/app_settings.dart';
 import '../../core/theme/app_theme.dart';
@@ -15,6 +16,8 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   late final TextEditingController _controller;
+  late final TextEditingController _foundryController;
+  String? _foundryError;
 
   @override
   void initState() {
@@ -22,12 +25,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _controller = TextEditingController(
       text: ref.read(readerUrlProvider) ?? kDefaultReaderUrl,
     );
+    _foundryController = TextEditingController(
+      text: ref.read(foundryUrlProvider) ?? '',
+    );
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _foundryController.dispose();
     super.dispose();
+  }
+
+  Future<void> _saveFoundry() async {
+    final ok = await ref
+        .read(foundryUrlProvider.notifier)
+        .set(_foundryController.text);
+    if (!mounted) return;
+    setState(() => _foundryError = ok ? null : 'Usá una URL https://');
+    if (ok) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('URL de Foundry guardada')));
+    }
   }
 
   Future<void> _save() async {
@@ -119,6 +139,42 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               onPressed: loading ? null : _reset,
               icon: const Icon(Icons.restart_alt, size: 18),
               label: const Text('Restaurar URL por defecto'),
+            ),
+            const SizedBox(height: 28),
+            const Text(
+              'FOUNDRY',
+              style: TextStyle(
+                fontSize: 11,
+                letterSpacing: 1.4,
+                color: AppColors.gold,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'URL de Foundry para la tab con la hoja real (login en Foundry).',
+              style: TextStyle(fontSize: 12, color: AppColors.label),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _foundryController,
+              keyboardType: TextInputType.url,
+              autocorrect: false,
+              style: const TextStyle(color: AppColors.parchment),
+              decoration: InputDecoration(
+                labelText: 'Foundry URL',
+                hintText: 'https://',
+                prefixIcon: const Icon(Icons.public),
+                border: const OutlineInputBorder(),
+                errorText: _foundryError,
+              ),
+              onSubmitted: (_) => _saveFoundry(),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: _saveFoundry,
+              icon: const Icon(Icons.check),
+              label: const Text('Guardar URL de Foundry'),
             ),
             const SizedBox(height: 28),
             const Text(

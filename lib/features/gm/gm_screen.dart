@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../controllers/session_controller.dart';
 import '../../core/theme/app_theme.dart';
 import '../player/pages/chat_page.dart';
-import '../player/token_control_screen.dart';
 import '../rules/rules_screen.dart';
 import 'dm_combat_screen.dart';
 import 'dm_dashboard.dart';
@@ -73,12 +72,7 @@ class _GmScreenState extends ConsumerState<GmScreen> {
           Expanded(
             child: IndexedStack(
               index: _tab,
-              children: const [
-                DmDashboard(),
-                DmCombatScreen(),
-                ChatPage(),
-                TokenControlScreen(),
-              ],
+              children: const [DmDashboard(), DmCombatScreen(), ChatPage()],
             ),
           ),
         ],
@@ -101,11 +95,6 @@ class _GmScreenState extends ConsumerState<GmScreen> {
             icon: Icon(Icons.forum_outlined),
             selectedIcon: Icon(Icons.forum),
             label: 'Chat',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.grid_view_outlined),
-            selectedIcon: Icon(Icons.grid_view),
-            label: 'Map',
           ),
         ],
       ),

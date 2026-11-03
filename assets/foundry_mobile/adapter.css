@@ -2,8 +2,13 @@
 
 /* --ffc-safe-top: alto del notch/cámara (px CSS), lo setea la app en cada
    carga. La WebView ocupa toda la pantalla; cada vista lo respeta. */
+/* --ffc-safe-bottom: alto del indicador de inicio / barra de gestos; la
+   WebView también va por detrás. */
+/* --ffc-kb: alto del teclado; la WebView no se redimensiona al abrirlo (lo
+   tapa) y cada vista deja ese espacio abajo. */
 body:not(.ffc-mobile) {
   padding-top: var(--ffc-safe-top, 0px) !important;
+  padding-bottom: max(var(--ffc-safe-bottom, 0px), var(--ffc-kb, 0px)) !important;
 }
 
 /* UI de mesa que no aplica en el teléfono. */
@@ -19,13 +24,14 @@ body.ffc-mobile #scene-navigation {
   display: none !important;
 }
 
-/* Sidebar (chat) oculto salvo que se abra con el botón flotante. */
+/* Sidebar (chat): siempre a pantalla completa y, cerrado, con
+   `content-visibility: hidden`: el navegador no pinta, no hit-testea ni
+   recalcula el log, pero conserva su layout, así que abrirlo no re-hace el
+   log. Sin reglas sobre los hijos (`#ui-right *`): cambiar la clase del body
+   recalculaba el estilo de cada mensaje. Opacity (no visibility) para que
+   ningún hijo con `visibility: visible` se asome sobre la hoja. */
 body.ffc-mobile #ui-right,
 body.ffc-mobile #sidebar {
-  display: none !important;
-}
-body.ffc-mobile.ffc-chat-open #ui-right,
-body.ffc-mobile.ffc-chat-open #sidebar {
   display: flex !important;
   position: fixed !important;
   inset: 0 !important;
@@ -35,18 +41,30 @@ body.ffc-mobile.ffc-chat-open #sidebar {
   margin: 0 !important;
   z-index: 50 !important;
 }
+body.ffc-mobile:not(.ffc-chat-open) #ui-right {
+  content-visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  z-index: -1 !important;
+}
 /* Panel del sidebar (v14: #sidebar > nav#sidebar-tabs + #sidebar-content >
    section.tab): a ancho completo, por debajo del notch y con lugar abajo para
    el overlay de la app. Abre en el chat; las tabs (configuración, combate…)
    quedan como barra horizontal arriba. */
-body.ffc-mobile.ffc-chat-open #sidebar {
+body.ffc-mobile #sidebar {
   --sidebar-width: 100vw;
   flex-direction: column;
   box-sizing: border-box;
-  padding: var(--ffc-safe-top, 0px) 0 112px !important;
+  /* Abajo: lugar para las burbujas (44px a 12px del borde), o el teclado si
+     está abierto. */
+  padding: var(--ffc-safe-top, 0px) 0
+    max(
+      calc(68px + var(--ffc-safe-bottom, 0px)),
+      calc(var(--ffc-kb, 0px) + 8px)
+    ) !important;
   background: #1a1b1f;
 }
-body.ffc-mobile.ffc-chat-open #sidebar-tabs {
+body.ffc-mobile #sidebar-tabs {
   opacity: 1 !important; /* v14 la atenúa (faded-ui) */
   flex: none !important;
   width: 100% !important;
@@ -55,24 +73,33 @@ body.ffc-mobile.ffc-chat-open #sidebar-tabs {
   padding: 4px 8px !important;
   overflow-x: auto !important;
 }
-body.ffc-mobile.ffc-chat-open #sidebar-tabs > menu > li > button {
+body.ffc-mobile #sidebar-tabs > menu > li > button {
   width: 40px !important;
   height: 40px !important;
   font-size: 18px !important;
 }
+/* Menú de la app (adapter.js) al final de las tabs, separado y en dorado. */
+body.ffc-mobile #sidebar-tabs .ffc-app-first {
+  margin-left: 8px !important;
+  padding-left: 8px !important;
+  border-left: 1px solid #c9a86a55;
+}
+body.ffc-mobile #sidebar-tabs .ffc-app-item > button {
+  color: #c9a86a !important;
+}
 /* El botón de colapsar el sidebar no aplica al panel. */
-body.ffc-mobile.ffc-chat-open #sidebar-tabs [data-action="toggleState"] {
+body.ffc-mobile #sidebar-tabs [data-action="toggleState"] {
   display: none !important;
 }
-body.ffc-mobile.ffc-chat-open #sidebar-tabs > menu {
+body.ffc-mobile #sidebar-tabs > menu {
   display: flex !important;
   flex-direction: row !important;
   justify-content: safe center !important;
   gap: 4px !important;
   margin: 0 !important;
 }
-body.ffc-mobile.ffc-chat-open #sidebar-content,
-body.ffc-mobile.ffc-chat-open #sidebar-content > .tab.active {
+body.ffc-mobile #sidebar-content,
+body.ffc-mobile #sidebar-content > .tab.active {
   display: flex !important;
   flex-direction: column !important;
   flex: 1 1 auto !important;
@@ -84,44 +111,47 @@ body.ffc-mobile.ffc-chat-open #sidebar-content > .tab.active {
 }
 /* Log con márgenes parejos y letra más chica; imágenes de tarjetas acotadas
    (p.ej. el banner de PSFX); input de alto fijo en vez de crecer. */
-body.ffc-mobile.ffc-chat-open #chat {
+body.ffc-mobile #chat {
   font-size: 13px;
 }
-body.ffc-mobile.ffc-chat-open #chat :is(.chat-log, #chat-log) {
+body.ffc-mobile #chat :is(.chat-log, #chat-log) {
   padding: 8px 10px !important;
   margin: 0 !important;
   scrollbar-gutter: auto !important;
 }
-body.ffc-mobile.ffc-chat-open #chat .chat-message {
+body.ffc-mobile #chat .chat-message {
   margin-inline: 0 !important;
 }
 /* Descripciones pegadas con estilos inline (fondo negro, texto blanco) en
    las tarjetas: se respeta el tema de la tarjeta. */
-body.ffc-mobile.ffc-chat-open #chat .chat-message .message-content [style] {
+body.ffc-mobile #chat .chat-message .message-content [style] {
   background: none !important;
   color: inherit !important;
 }
-body.ffc-mobile.ffc-chat-open #chat .chat-message .message-content img {
+body.ffc-mobile #chat .chat-message .message-content img {
   max-height: 140px !important;
   width: auto !important;
   max-width: 100% !important;
   object-fit: contain;
 }
-body.ffc-mobile.ffc-chat-open #chat .chat-form,
-body.ffc-mobile.ffc-chat-open #chat #chat-form {
+body.ffc-mobile #chat .chat-form,
+body.ffc-mobile #chat #chat-form {
   flex: none !important;
   padding: 0 10px !important;
 }
-body.ffc-mobile.ffc-chat-open #chat #chat-message {
+body.ffc-mobile #chat #chat-message {
   flex: none !important;
   height: 72px !important;
   min-height: 0 !important;
   font-size: 14px !important;
 }
 /* Con el chat abierto se ocultan las hojas; los diálogos (p.ej. tirada de daño
-   desde una tarjeta de MidiQOL) siguen apareciendo encima del chat. */
+   desde una tarjeta de MidiQOL) siguen apareciendo encima del chat.
+   `content-visibility` salta el subárbol (sin recalcular la `visibility`
+   heredada en cada nodo) y conserva su render para volver rápido. */
 body.ffc-mobile.ffc-chat-open .window-app.sheet,
 body.ffc-mobile.ffc-chat-open .application.sheet {
+  content-visibility: hidden !important;
   visibility: hidden !important;
 }
 
@@ -138,14 +168,31 @@ body.ffc-mobile .application.sheet {
   border-radius: 0 !important;
 }
 
-/* Diálogos (configuración de tirada, MidiQOL, etc.): ancho completo. */
+/* Diálogos (configuración de tirada, MidiQOL, etc.): ancho completo y
+   centrados en el área libre entre el notch y las burbujas/overlay de abajo
+   (120px) o el teclado; Foundry los posiciona por coordenadas de escritorio. */
+body.ffc-mobile {
+  --ffc-dialog-top: var(--ffc-safe-top, 0px);
+  --ffc-dialog-bottom: max(
+    calc(120px + var(--ffc-safe-bottom, 0px)),
+    var(--ffc-kb, 0px)
+  );
+}
 body.ffc-mobile .window-app:not(.sheet),
 body.ffc-mobile .application:not(.sheet) {
   left: 8px !important;
   width: calc(100vw - 16px) !important;
   max-width: none !important;
-  max-height: calc(100vh - 16px) !important;
+  top: calc(
+    var(--ffc-dialog-top) +
+      (100vh - var(--ffc-dialog-top) - var(--ffc-dialog-bottom)) / 2
+  ) !important;
+  bottom: auto !important;
+  max-height: calc(
+    100vh - var(--ffc-dialog-top) - var(--ffc-dialog-bottom) - 16px
+  ) !important;
   transform: none !important;
+  translate: 0 -50% !important;
 }
 
 body.ffc-mobile .window-resizable-handle,
@@ -157,10 +204,11 @@ body.ffc-mobile .window-resize-handle {
    hoja (y del input del chat): objetivos a la izquierda del chat. */
 #ffc-chat-toggle,
 #ffc-targets-toggle,
+#ffc-back,
 #ffc-targets .ffc-targets-clear,
 #ffc-targets .ffc-targets-close {
   position: fixed;
-  bottom: 64px;
+  bottom: calc(64px + var(--ffc-safe-bottom, 0px));
   z-index: 10001;
   height: 44px;
   border-radius: 22px;
@@ -187,9 +235,30 @@ body.ffc-mobile .window-resize-handle {
   padding: 0 12px;
   font-size: 16px;
 }
+/* Volver (cierra la ventana de arriba: item, mochila, diálogo): solo si hay
+   una; va en el borde y corre a las otras dos a la izquierda. */
+#ffc-back {
+  right: 12px;
+  width: 44px;
+  padding: 0;
+}
+body:not(.ffc-can-back) #ffc-back {
+  display: none;
+}
+body.ffc-can-back:not(.ffc-targets-open) #ffc-chat-toggle {
+  right: 64px;
+}
+body.ffc-can-back:not(.ffc-targets-open) #ffc-targets-toggle {
+  right: 116px;
+}
+/* En el chat no hay barra de tabs abajo: las burbujas bajan al borde. */
+body.ffc-chat-open:not(.ffc-targets-open) :is(#ffc-chat-toggle, #ffc-targets-toggle, #ffc-back) {
+  bottom: calc(12px + var(--ffc-safe-bottom, 0px));
+}
 /* En el panel de objetivos solo queda su botón de cerrar. */
 body.ffc-targets-open #ffc-chat-toggle,
-body.ffc-targets-open #ffc-targets-toggle {
+body.ffc-targets-open #ffc-targets-toggle,
+body.ffc-targets-open #ffc-back {
   display: none;
 }
 
@@ -210,15 +279,25 @@ body.ffc-targets-open #ffc-targets-toggle {
 
 body.ffc-mobile .ffc-sheet {
   -webkit-touch-callout: none; /* el long-press abre el menú de Foundry */
+  /* Sin selección de texto nativa al mantener apretado (se confundía con el
+     long-press); los campos editables siguen seleccionables. */
+  -webkit-user-select: none;
+  user-select: none;
   /* dnd5e fija min-width: 800px / min-height: 700px en la hoja. */
   min-width: 0 !important;
   min-height: 0 !important;
 }
+body.ffc-mobile .ffc-sheet :is(input, textarea, select, [contenteditable="true"]) {
+  -webkit-user-select: text;
+  user-select: text;
+}
 
 /* Barra de ventana: debajo del notch; el fondo del header de la hoja sube por
    detrás (dnd5e ya la superpone con margin -65px en .window-content). Sin
-   cerrar ni íconos sueltos: quedan el menú ⋮, el modo edición y el toggle de
-   estadísticas. */
+   íconos sueltos: quedan el menú ⋮, el modo edición, el toggle de
+   estadísticas y cerrar; cerrar solo en las hojas que se abren encima de la
+   principal (items, contenedores como la mochila), que no tienen otra
+   salida. */
 body.ffc-mobile .ffc-sheet .window-header {
   margin-top: var(--ffc-safe-top, 0px) !important;
 }
@@ -227,8 +306,10 @@ body.ffc-mobile .ffc-sheet.character .window-content {
 }
 body.ffc-mobile .ffc-sheet .window-header .header-control:not(
     [data-action="toggleControls"],
+    [data-action="close"],
     .ffc-sidebar-toggle
   ),
+body.ffc-mobile .ffc-sheet.ffc-main-sheet .window-header [data-action="close"],
 body.ffc-mobile .ffc-sheet .window-header .header-elements {
   display: none !important;
 }
@@ -333,7 +414,10 @@ body.ffc-mobile .ffc-sheet .main-content {
   /* Las tarjetas de dnd5e tienen pestañas y sombras que sobresalen. */
   gap: 28px !important;
   padding: 16px 8px !important;
-  padding-bottom: calc(var(--ffc-tabbar-h) + 72px) !important;
+  padding-bottom: max(
+    calc(var(--ffc-tabbar-h) + 72px + var(--ffc-safe-bottom, 0px)),
+    calc(var(--ffc-kb, 0px) + 16px)
+  ) !important;
 }
 body.ffc-mobile .ffc-sheet .main-content > .sidebar {
   margin: 0 !important;
@@ -401,7 +485,7 @@ body.ffc-mobile .ffc-sheet nav.tabs {
   right: 0 !important;
   bottom: 0 !important;
   top: auto !important;
-  height: var(--ffc-tabbar-h) !important;
+  height: calc(var(--ffc-tabbar-h) + var(--ffc-safe-bottom, 0px)) !important;
   width: 100vw !important;
   display: flex !important;
   flex-direction: row !important;
@@ -410,7 +494,8 @@ body.ffc-mobile .ffc-sheet nav.tabs {
   align-items: center !important;
   gap: 4px !important;
   margin: 0 !important;
-  padding: 0 24px !important; /* esquinas redondeadas de la pantalla */
+  /* Costados: esquinas redondeadas de la pantalla; abajo: indicador de inicio. */
+  padding: 0 24px var(--ffc-safe-bottom, 0px) !important;
   box-sizing: border-box !important;
   overflow-x: auto !important;
   overflow-y: hidden !important;

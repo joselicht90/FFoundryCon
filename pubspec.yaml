@@ -38,6 +38,12 @@ dependencies:
   # Tipografía (Cinzel / Signika)
   google_fonts: ^6.2.1
 
+  # Hoja real de Foundry (tab Foundry)
+  webview_flutter: ^4.13.1
+  # Inspección remota de la WebView en builds debug
+  webview_flutter_android: ^4.12.0
+  webview_flutter_wkwebview: ^3.25.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -63,3 +69,5 @@ flutter_launcher_icons:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/foundry_mobile/

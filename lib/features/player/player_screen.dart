@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../controllers/actor_controller.dart';
@@ -16,8 +17,8 @@ import '../../models/foundry_combat.dart';
 import 'combat_screen.dart';
 import '../rules/rules_screen.dart';
 import 'compendium_screen.dart';
-import 'map_screen.dart';
 import 'pages/chat_page.dart';
+import 'pages/foundry_sheet_page.dart';
 import 'pages/skills_page.dart';
 import 'pages/summary_page.dart';
 import 'widgets/actor_avatar.dart';
@@ -37,11 +38,11 @@ const _navItems = [
   _NavItem(Icons.format_list_bulleted, 'Skills'),
   _NavItem(Icons.auto_awesome, 'Spells'),
   _NavItem(Icons.backpack_outlined, 'Items'),
-  _NavItem(Icons.grid_view, 'Map'),
   _NavItem(Icons.forum_outlined, 'Chat'),
+  _NavItem(Icons.public, 'Foundry'),
 ];
 
-const _mapIndex = 4; // el mapa requiere Foundry online
+const _foundryIndex = 5; // hoja real de Foundry en WebView
 
 class PlayerScreen extends ConsumerStatefulWidget {
   const PlayerScreen({super.key});
@@ -53,6 +54,11 @@ class PlayerScreen extends ConsumerStatefulWidget {
 class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   final _pc = PageController();
   int _page = 0;
+  // Última tab nativa, a la que vuelve el overlay de la hoja de Foundry.
+  int _lastPage = 0;
+  // Durante animateToPage, onPageChanged reporta cada página intermedia; se
+  // ignoran para no alternar el modo inmersivo ni pisar [_lastPage].
+  bool _animating = false;
 
   // Watcher de resultados: baseline para ignorar el historial ya cargado y set
   // de tiradas ya notificadas.
@@ -140,30 +146,40 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
 
   @override
   void dispose() {
+    if (_page == _foundryIndex) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
     _toaster.dispose();
     _pc.dispose();
     super.dispose();
   }
 
-  void _go(int navIndex) {
-    // El mapa abre en pantalla aparte: sus gestos (pan/zoom/drag) no conviven
-    // con el swipe horizontal del PageView.
-    if (navIndex == _mapIndex) {
-      final offline =
-          ref.read(actorControllerProvider).valueOrNull?.offline ?? false;
-      if (offline) return; // mapa requiere Foundry online
-      Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => const MapScreen()));
-      return;
+  /// La tab Foundry es inmersiva: oculta las barras del sistema mientras está
+  /// activa (el chrome propio se omite en [build]).
+  void _setPage(int page) {
+    final wasFoundry = _page == _foundryIndex;
+    final isFoundry = page == _foundryIndex;
+    if (!isFoundry) _lastPage = page;
+    if (wasFoundry != isFoundry) {
+      SystemChrome.setEnabledSystemUIMode(
+        isFoundry ? SystemUiMode.immersiveSticky : SystemUiMode.edgeToEdge,
+      );
     }
-    final page = navIndex < _mapIndex ? navIndex : navIndex - 1;
     setState(() => _page = page);
-    _pc.animateToPage(
-      page,
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeOut,
-    );
+  }
+
+  Future<void> _go(int page) async {
+    _setPage(page);
+    _animating = true;
+    try {
+      await _pc.animateToPage(
+        page,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
+    } finally {
+      _animating = false;
+    }
   }
 
   @override
@@ -172,15 +188,23 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     _watchCombatTurn();
     final state = ref.watch(actorControllerProvider);
     final actor = state.valueOrNull;
+    // La WebView solo existe con personaje cargado; sin él no hay pantalla
+    // completa (si no, quedaría sin chrome y sin salida).
+    final fullscreen = _page == _foundryIndex && actor != null;
 
-    return Scaffold(
+    final scaffold = Scaffold(
       body: Column(
         children: [
-          _Header(actor: actor),
-          if (actor != null && actor.offline)
-            _OfflineBanner(pendingCount: actor.pending.length),
-          _CombatBanner(actorId: actor?.id),
+          if (!fullscreen) ...[
+            _Header(actor: actor),
+            if (actor != null && actor.offline)
+              _OfflineBanner(pendingCount: actor.pending.length),
+            _CombatBanner(actorId: actor?.id),
+          ],
+          // Key estable: al quitar/poner el chrome no se recrea el PageView
+          // (ni la WebView de Foundry, que es cara de recargar).
           Expanded(
+            key: const ValueKey('pages'),
             child: state.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => _ErrorBody(error: '$e'),
@@ -190,13 +214,23 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                 }
                 return PageView(
                   controller: _pc,
-                  onPageChanged: (i) => setState(() => _page = i),
+                  // En la hoja de Foundry el swipe no compite con sus gestos.
+                  physics: _page == _foundryIndex
+                      ? const NeverScrollableScrollPhysics()
+                      : null,
+                  onPageChanged: (i) {
+                    if (!_animating) _setPage(i);
+                  },
                   children: [
                     SummaryPage(actor: a),
                     SkillsPage(actor: a),
                     SpellsList(actor: a),
                     InventoryList(actor: a),
                     const ChatPage(),
+                    FoundrySheetPage(
+                      actorId: a.id,
+                      onExit: () => _go(_lastPage),
+                    ),
                   ],
                 );
               },
@@ -204,12 +238,22 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: _BottomNav(
-        // _page no incluye el mapa (pantalla aparte); mapeo a índice de nav.
-        current: _page < _mapIndex ? _page : _page + 1,
-        onTap: _go,
-        offline: actor?.offline ?? false,
-      ),
+      bottomNavigationBar: fullscreen
+          ? null
+          : _BottomNav(
+              current: _page,
+              onTap: _go,
+              offline: actor?.offline ?? false,
+            ),
+    );
+
+    // Back del sistema en la hoja de Foundry: vuelve a la tab anterior.
+    return PopScope(
+      canPop: !fullscreen,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _go(_lastPage);
+      },
+      child: scaffold,
     );
   }
 }
@@ -626,7 +670,7 @@ class _BottomNav extends StatelessWidget {
           for (int i = 0; i < _navItems.length; i++)
             Expanded(
               child: () {
-                final disabled = i == _mapIndex && offline;
+                final disabled = i == _foundryIndex && offline;
                 final color = disabled
                     ? AppColors.muted.withAlpha(70)
                     : (i == current ? AppColors.gold : AppColors.muted);

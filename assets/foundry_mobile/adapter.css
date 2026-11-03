@@ -156,7 +156,9 @@ body.ffc-mobile .window-resize-handle {
 /* Burbujas flotantes, a la derecha y por encima de la barra de tabs de la
    hoja (y del input del chat): objetivos a la izquierda del chat. */
 #ffc-chat-toggle,
-#ffc-targets-toggle {
+#ffc-targets-toggle,
+#ffc-targets .ffc-targets-clear,
+#ffc-targets .ffc-targets-close {
   position: fixed;
   bottom: 64px;
   z-index: 10001;
@@ -171,12 +173,14 @@ body.ffc-mobile .window-resize-handle {
   align-items: center;
   justify-content: center;
 }
-#ffc-chat-toggle {
+#ffc-chat-toggle,
+#ffc-targets .ffc-targets-close {
   right: 12px;
   width: 44px;
   padding: 0;
 }
-#ffc-targets-toggle {
+#ffc-targets-toggle,
+#ffc-targets .ffc-targets-clear {
   right: 64px;
   width: auto;
   min-width: 44px;
@@ -479,21 +483,6 @@ body.ffc-targets-open #ffc-targets {
   flex: 1;
   margin: 0;
   border: none;
-  color: #c9a86a;
-}
-#ffc-targets header .ffc-targets-close {
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border-radius: 50%;
-  font-size: 18px;
-}
-#ffc-targets header button {
-  width: auto;
-  padding: 6px 14px;
-  border-radius: 16px;
-  border: 1px solid #c9a86a;
-  background: transparent;
   color: #c9a86a;
 }
 #ffc-targets .ffc-target-tabs {

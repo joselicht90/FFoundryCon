@@ -96,11 +96,19 @@
   toggle.id = 'ffc-chat-toggle';
   toggle.type = 'button';
   // Burbuja con ícono (Font Awesome viene con Foundry): chat / volver a hoja.
-  toggle.className = 'fa-solid fa-comment';
+  // El ícono va en un <i>: con las clases fa-* en el <button>, la regla de
+  // fuente de botones de Foundry le gana y se ve el glifo roto.
+  const icon = (name) => {
+    const i = document.createElement('i');
+    i.className = `fa-solid ${name}`;
+    i.inert = true;
+    return i;
+  };
+  toggle.replaceChildren(icon('fa-comment'));
   toggle.setAttribute('aria-label', 'Chat');
   const setChatOpen = (open) => {
     document.body.classList.toggle('ffc-chat-open', open);
-    toggle.className = `fa-solid ${open ? 'fa-scroll' : 'fa-comment'}`;
+    toggle.replaceChildren(icon(open ? 'fa-scroll' : 'fa-comment'));
     toggle.setAttribute('aria-label', open ? 'Hoja' : 'Chat');
     if (open) openChat();
   };
@@ -435,8 +443,11 @@
     const header = document.createElement('header');
     const title = document.createElement('h3');
     title.textContent = 'Objetivos';
+    // Limpiar y cerrar abajo, donde están las burbujas de objetivos y chat
+    // (ocultas con el panel abierto).
     const clear = document.createElement('button');
     clear.type = 'button';
+    clear.className = 'ffc-targets-clear';
     clear.textContent = 'Limpiar';
     clear.addEventListener('click', () => {
       game.user.targets.clear();
@@ -445,12 +456,13 @@
     });
     const close = document.createElement('button');
     close.type = 'button';
-    close.className = 'ffc-targets-close fa-solid fa-xmark';
+    close.className = 'ffc-targets-close';
     close.setAttribute('aria-label', 'Cerrar');
+    close.append(icon('fa-xmark'));
     close.addEventListener('click', () =>
       document.body.classList.remove('ffc-targets-open'),
     );
-    header.append(title, clear, close);
+    header.append(title);
 
     const tabs = document.createElement('nav');
     tabs.className = 'ffc-target-tabs';
@@ -471,7 +483,7 @@
     list.className = 'ffc-target-list';
     if (rows.length) list.append(...rows);
     else list.textContent = 'No hay tokens en esta lista.';
-    targetsPanel.replaceChildren(header, tabs, list);
+    targetsPanel.replaceChildren(header, tabs, list, clear, close);
   };
 
   function openTargets() {

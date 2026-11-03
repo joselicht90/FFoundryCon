@@ -2,26 +2,15 @@ import 'package:dio/dio.dart';
 
 import 'app_logger.dart';
 
-/// Loguea cada request, respuesta y error de Dio con formato.
+/// Loguea los errores de Dio. Las requests exitosas no: el poll de chat y
+/// combate llenaría el log. Nunca la URL del reader ni sus ids (ver
+/// AGENTS.md): solo método y estado.
 class DioLoggingInterceptor extends Interceptor {
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    logger.d('→ ${options.method} ${options.uri}');
-    handler.next(options);
-  }
-
-  @override
-  void onResponse(Response response, ResponseInterceptorHandler handler) {
-    logger.d('← ${response.statusCode} ${response.requestOptions.uri}');
-    handler.next(response);
-  }
-
-  @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    final req = err.requestOptions;
     logger.e(
-      '✗ ${req.method} ${req.uri} → ${err.response?.statusCode ?? err.type.name}',
-      error: err,
+      '✗ ${err.requestOptions.method} → '
+      '${err.response?.statusCode ?? err.type.name}',
       stackTrace: err.stackTrace,
     );
     handler.next(err);

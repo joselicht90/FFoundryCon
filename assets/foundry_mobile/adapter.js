@@ -1,8 +1,9 @@
 // Adaptador móvil de FFoundryCon para Foundry VTT. Lo inyecta
 // lib/features/player/pages/foundry_sheet_page.dart tras cada carga de página,
-// precedido por `const FFC = {actorId, css};`. Idempotente; no envía nada
-// de vuelta a la app.
-(() => {
+// precedido por `const FFC = {actorId, css};`. Idempotente. A la app solo le
+// manda los comandos de su menú (canal `FFoundryCon`: exit, reload, logout) y
+// le responde al back del sistema (`window.__ffcBack`).
+(async () => {
   if (window.__ffcAdapter) return;
   window.__ffcAdapter = true;
 
@@ -64,8 +65,22 @@
     }
   }).observe(document.body, { childList: true, subtree: true });
 
+  // El teclado tapa la WebView (no la redimensiona, ver --ffc-kb en el CSS):
+  // al enfocar un campo, llevarlo a la vista cuando el teclado ya subió. El
+  // input del chat no hace falta: el panel ya deja ese espacio abajo.
+  document.addEventListener('focusin', (ev) => {
+    const field = ev.target;
+    if (!field.matches?.('input, textarea, select, [contenteditable="true"]')) return;
+    if (field.closest('#sidebar')) return;
+    setTimeout(() => field.scrollIntoView({ block: 'center' }), 350);
+  });
+
   if (!location.pathname.endsWith('/game')) return;
   document.body.classList.add('ffc-mobile');
+
+  // La app inyecta en el load de la página, pero Foundry crea sus globales
+  // (Hooks, game, CONFIG) después: todo lo que sigue las necesita.
+  while (!window.Hooks) await new Promise((r) => setTimeout(r, 50));
 
   // Pantalla de carga hasta que se abre la hoja (Foundry tarda en inicializar
   // el mundo). Se quita al renderizar la hoja de personaje, si no hay
@@ -81,14 +96,50 @@
   const hideLoading = () => loading.remove();
   setTimeout(hideLoading, 60000);
 
+  // Deja el sidebar expandido en la pestaña de chat. Se llama al estar listo
+  // (pre-render con el panel invisible) y al abrirlo; solo toca lo que haga
+  // falta para no forzar re-renders.
   const openChat = () => {
     const sidebar = window.ui?.sidebar;
     try {
-      sidebar?.expand?.();
-      if (sidebar?.changeTab) sidebar.changeTab('chat', 'primary');
-      else sidebar?.activateTab?.('chat');
+      if (!sidebar?.expanded) sidebar?.expand?.();
+      if (sidebar?.changeTab) {
+        if (sidebar.tabGroups?.primary !== 'chat') sidebar.changeTab('chat', 'primary');
+      } else {
+        sidebar?.activateTab?.('chat');
+      }
     } catch (e) {
       console.warn('FFoundryCon: no se pudo abrir el chat', e);
+    }
+  };
+
+  // Menú de la app en la barra de tabs del chat (junto a los menús de
+  // Foundry). Foundry puede re-renderizar el sidebar: se re-agrega.
+  const appMenu = [
+    ['fa-arrow-left', 'Volver a la app', 'exit'],
+    ['fa-rotate-right', 'Recargar Foundry', 'reload'],
+    ['fa-right-from-bracket', 'Cerrar sesión de Foundry', 'logout'],
+  ];
+  const addAppMenu = () => {
+    const menu = document.querySelector('#sidebar-tabs > menu');
+    if (!menu || menu.querySelector('.ffc-app-item')) return;
+    for (const [i, [name, label, command]] of appMenu.entries()) {
+      const li = document.createElement('li');
+      li.className = 'ffc-app-item';
+      li.classList.toggle('ffc-app-first', i === 0);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'ui-control plain icon';
+      btn.dataset.tooltip = label;
+      btn.setAttribute('aria-label', label);
+      btn.append(icon(name));
+      btn.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        window.FFoundryCon?.postMessage(command);
+      });
+      li.append(btn);
+      menu.append(li);
     }
   };
 
@@ -203,9 +254,17 @@
     else header.prepend(btn);
   };
 
+  // Hoja que abrió openSheet: la única sin botón de cerrar (la salida es
+  // volver en la app). Las demás (items, la mochila) se apilan encima.
+  let mainActorId = null;
+
   const adaptSheet = (app, el) => {
     if (!el || !isDocSheet(app)) return;
     el.classList.add('ffc-sheet');
+    el.classList.toggle(
+      'ffc-main-sheet',
+      app.document.documentName === 'Actor' && app.document.id === mainActorId,
+    );
     addHeaderPortrait(app, el);
     watchScroll(el);
     // Solo hoja de personaje (tiene sidebar).
@@ -216,7 +275,12 @@
     );
   };
 
-  Hooks.on('renderApplicationV2', (app, el) => adaptSheet(app, el));
+  Hooks.on('renderApplicationV2', (app, el) => {
+    adaptSheet(app, el);
+    if (app === window.ui?.sidebar) addAppMenu();
+    updateBackButton();
+  });
+  Hooks.on('closeApplicationV2', () => updateBackButton());
   for (const app of foundry.applications?.instances?.values?.() ?? []) {
     adaptSheet(app, app.element);
   }
@@ -230,10 +294,21 @@
     let timer = null;
     let start = null;
     let suppressClick = false;
+    // Un toque para frenar el scroll con inercia no es un long-press: se
+    // ignoran los que empiezan mientras (o justo después de que) algo scrollea.
+    let lastScroll = 0;
     const cancel = () => {
       clearTimeout(timer);
       timer = null;
     };
+    document.addEventListener(
+      'scroll',
+      () => {
+        lastScroll = performance.now();
+        cancel();
+      },
+      { capture: true, passive: true },
+    );
     document.addEventListener(
       'touchstart',
       (ev) => {
@@ -241,6 +316,7 @@
         // Un long-press puede no generar click: no arrastrar la supresión.
         suppressClick = false;
         if (ev.touches.length !== 1) return;
+        if (performance.now() - lastScroll < 300) return;
         const t = ev.touches[0];
         start = { x: t.clientX, y: t.clientY, target: ev.target };
         timer = setTimeout(() => {
@@ -299,6 +375,7 @@
       ui.notifications?.warn('FFoundryCon: personaje no encontrado');
       return;
     }
+    mainActorId = actor.id;
     actor.sheet?.render(true);
   };
 
@@ -491,10 +568,65 @@
     document.body.classList.add('ffc-targets-open');
   }
 
+  // Ventana de más arriba que se puede cerrar (hasFrame: no sidebar/hotbar),
+  // sin contar la hoja principal: items, contenedores como la mochila,
+  // diálogos.
+  const topWindow = () =>
+    [...(foundry.applications?.instances?.values?.() ?? [])]
+      .filter(
+        (app) =>
+          app.rendered &&
+          app.hasFrame &&
+          !app.element?.classList.contains('ffc-main-sheet'),
+      )
+      .sort((a, b) => (a.position?.zIndex ?? 0) - (b.position?.zIndex ?? 0))
+      .at(-1);
+
+  // Sin animación: AppV2 espera la transición de cierre (con timeout) y en
+  // ventanas a pantalla completa no hay transición, así que tardaba en irse.
+  const closeTopWindow = () => {
+    const top = topWindow();
+    top?.close({ animate: false });
+    return !!top;
+  };
+
+  // Burbuja de volver (a la derecha del chat) mientras haya una ventana que
+  // cerrar. Los hooks de render/close corren antes de que cambie el estado de
+  // la ventana: se recalcula al terminar.
+  const backButton = document.createElement('button');
+  backButton.id = 'ffc-back';
+  backButton.type = 'button';
+  backButton.setAttribute('aria-label', 'Volver');
+  backButton.append(icon('fa-arrow-left'));
+  backButton.addEventListener('click', closeTopWindow);
+  document.body.appendChild(backButton);
+  function updateBackButton() {
+    setTimeout(() => {
+      document.body.classList.toggle('ffc-can-back', !!topWindow());
+    }, 50);
+  }
+
+  // Back del sistema (lo llama la app): cierra lo de más arriba y devuelve
+  // true; false si solo queda la hoja principal y la app sale de la tab.
+  window.__ffcBack = () => {
+    const body = document.body.classList;
+    if (body.contains('ffc-targets-open')) {
+      body.remove('ffc-targets-open');
+      return true;
+    }
+    if (body.contains('ffc-chat-open')) {
+      setChatOpen(false);
+      return true;
+    }
+    return closeTopWindow();
+  };
+
   const onReady = () => {
     patchNoCanvasTokens();
+    addAppMenu();
+    openChat(); // pre-render del chat, todavía invisible
     openSheet();
   };
   if (window.game?.ready) onReady();
   else Hooks.once('ready', onReady);
-})();
+})().catch((e) => console.error(`FFoundryCon adapter: ${e}\n${e?.stack}`));

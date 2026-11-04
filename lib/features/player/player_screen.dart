@@ -140,7 +140,11 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
         _notifiedRolls.add(m.id); // marcamos todas las nuevas como vistas
         if (latest == null || m.timestamp > latest.timestamp) latest = m;
       }
-      if (latest != null && mounted) _toaster.show(context, latest);
+      // En la tab de Foundry el resultado ya está en su chat: se marca como
+      // visto sin toast.
+      if (latest != null && mounted && _page != _foundryIndex) {
+        _toaster.show(context, latest);
+      }
     });
   }
 
@@ -192,7 +196,11 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     // completa (si no, quedaría sin chrome y sin salida).
     final fullscreen = _page == _foundryIndex && actor != null;
 
-    final scaffold = Scaffold(
+    // El back del sistema en la hoja de Foundry lo maneja FoundrySheetPage.
+    return Scaffold(
+      // En la hoja de Foundry el teclado no redimensiona la WebView (Foundry
+      // re-layoutea todo en cada resize); el adaptador lo maneja con CSS.
+      resizeToAvoidBottomInset: !fullscreen,
       body: Column(
         children: [
           if (!fullscreen) ...[
@@ -229,6 +237,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                     const ChatPage(),
                     FoundrySheetPage(
                       actorId: a.id,
+                      active: fullscreen,
                       onExit: () => _go(_lastPage),
                     ),
                   ],
@@ -245,15 +254,6 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
               onTap: _go,
               offline: actor?.offline ?? false,
             ),
-    );
-
-    // Back del sistema en la hoja de Foundry: vuelve a la tab anterior.
-    return PopScope(
-      canPop: !fullscreen,
-      onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) _go(_lastPage);
-      },
-      child: scaffold,
     );
   }
 }
@@ -533,7 +533,7 @@ class _RollToastState extends State<_RollToast>
     final m = widget.msg;
     return SizeTransition(
       sizeFactor: CurvedAnimation(parent: _ac, curve: Curves.easeOut),
-      axisAlignment: -1,
+      alignment: AlignmentDirectional.topStart,
       child: FadeTransition(
         opacity: _ac,
         child: Padding(

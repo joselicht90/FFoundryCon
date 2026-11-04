@@ -15,13 +15,16 @@ import '../../../core/theme/app_theme.dart';
 /// form de Foundry, la app nunca ve la contraseña) y le inyecta el adaptador
 /// móvil de `assets/foundry_mobile/`, que abre la hoja de [actorId] a pantalla
 /// completa sin canvas. La tab es inmersiva (sin chrome de la app): [onExit]
-/// vuelve a la tab anterior. Ver `docs/engineering/architecture.md`.
+/// vuelve a la tab anterior. Mientras está [active] maneja el back del
+/// sistema. Ver `docs/engineering/architecture.md`.
 class FoundrySheetPage extends ConsumerStatefulWidget {
   final String actorId;
+  final bool active;
   final VoidCallback onExit;
   const FoundrySheetPage({
     super.key,
     required this.actorId,
+    required this.active,
     required this.onExit,
   });
 
@@ -35,10 +38,32 @@ class _FoundrySheetPageState extends ConsumerState<FoundrySheetPage>
   @override
   bool get wantKeepAlive => true;
 
+  // Nueva por URL: cambiarla recrea la WebView.
+  GlobalKey<_FoundryWebViewState>? _webKey;
+  String? _webUrl;
+
+  /// Back del sistema: primero cierra lo que esté encima de la hoja en
+  /// Foundry; si no había nada, sale de la tab.
+  Future<void> _back() async {
+    final web = _webKey?.currentState;
+    if (web != null && await web.handleBack()) return;
+    widget.onExit();
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
     final url = ref.watch(foundryUrlProvider);
+    return PopScope(
+      canPop: !widget.active,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _back();
+      },
+      child: _body(url),
+    );
+  }
+
+  Widget _body(String? url) {
     if (url == null) {
       return Center(
         child: Padding(
@@ -58,8 +83,12 @@ class _FoundrySheetPageState extends ConsumerState<FoundrySheetPage>
         ),
       );
     }
+    if (url != _webUrl) {
+      _webUrl = url;
+      _webKey = GlobalKey();
+    }
     return _FoundryWebView(
-      key: ValueKey(url),
+      key: _webKey,
       baseUrl: url,
       actorId: widget.actorId,
       onExit: widget.onExit,
@@ -86,12 +115,22 @@ class _FoundryWebViewState extends State<_FoundryWebView> {
   late final WebViewController _web;
   late final String _origin;
   late final Uri _join;
+  late final Uri _game;
   late final Future<String> _adapter;
   int _progress = 0;
   bool _failed = false;
-  // Alto del notch/cámara: la WebView va por detrás y el adaptador lo respeta
-  // vía la variable CSS --ffc-safe-top.
+  // En /game las acciones de la app están en el menú que el adaptador agrega
+  // al chat; fuera (login de Foundry) no hay chat y se muestra el overlay.
+  bool _inGame = false;
+  // Alto del notch/cámara, del indicador de inicio y del teclado: la WebView
+  // va por detrás de los tres (no se redimensiona al abrir el teclado: Foundry
+  // re-layoutea todo en cada resize) y el adaptador los respeta vía
+  // --ffc-safe-top / --ffc-safe-bottom / --ffc-kb.
   double _safeTop = 0;
+  double _safeBottom = 0;
+  double _keyboard = 0;
+  bool _pushingInsets = false;
+  bool _insetsDirty = false;
 
   @override
   void initState() {
@@ -99,10 +138,12 @@ class _FoundryWebViewState extends State<_FoundryWebView> {
     final base = Uri.parse(widget.baseUrl);
     _origin = base.origin;
     _join = base.replace(path: '${base.path}/join');
+    _game = base.replace(path: '${base.path}/game');
     _adapter = _loadAdapter();
     _web = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(AppColors.bg)
+      ..addJavaScriptChannel('FFoundryCon', onMessageReceived: _onAppCommand)
       ..setNavigationDelegate(
         NavigationDelegate(
           // Solo el origin de Foundry; cualquier otro destino se bloquea.
@@ -120,10 +161,15 @@ class _FoundryWebViewState extends State<_FoundryWebView> {
           onProgress: (p) {
             if (mounted) setState(() => _progress = p);
           },
-          onPageStarted: (_) {
-            if (mounted) setState(() => _failed = false);
+          onPageStarted: (url) {
+            if (mounted) {
+              setState(() {
+                _failed = false;
+                _inGame = Uri.tryParse(url)?.path.endsWith('/game') ?? false;
+              });
+            }
           },
-          onPageFinished: (_) => _inject(),
+          onPageFinished: _inject,
           onWebResourceError: (err) {
             if (err.isForMainFrame ?? false) {
               if (mounted) setState(() => _failed = true);
@@ -131,7 +177,9 @@ class _FoundryWebViewState extends State<_FoundryWebView> {
           },
         ),
       )
-      ..loadRequest(_join);
+      // /game reusa la sesión guardada en las cookies (entra directo); sin
+      // sesión el servidor de Foundry redirige a /join.
+      ..loadRequest(_game);
     if (kDebugMode) {
       _enableInspection();
       _forwardConsole();
@@ -167,7 +215,9 @@ class _FoundryWebViewState extends State<_FoundryWebView> {
       'assets/foundry_mobile/adapter.css',
     );
     final config = jsonEncode({'actorId': widget.actorId, 'css': css});
-    return '(() => { const FFC = $config;\n$js\n})();';
+    // Termina en `true`: WKWebView falla si el script evalúa a undefined. Los
+    // errores del adaptador salen por consola (en debug, ver _forwardConsole).
+    return '(() => { const FFC = $config;\n$js\n})();\ntrue;';
   }
 
   /// Foundry marca al usuario como activo (grisado en /join) mientras su
@@ -182,26 +232,75 @@ class _FoundryWebViewState extends State<_FoundryWebView> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final top = MediaQuery.viewPaddingOf(context).top;
-    if (top != _safeTop) {
-      _safeTop = top;
-      _pushSafeTop();
+    final padding = MediaQuery.viewPaddingOf(context);
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
+    if (padding.top != _safeTop ||
+        padding.bottom != _safeBottom ||
+        keyboard != _keyboard) {
+      _safeTop = padding.top;
+      _safeBottom = padding.bottom;
+      _keyboard = keyboard;
+      _pushInsets();
     }
   }
 
-  Future<void> _pushSafeTop() async {
+  /// El teclado anima el inset cuadro a cuadro: una sola llamada en vuelo y,
+  /// al terminar, se reenvía el último valor si cambió mientras tanto.
+  Future<void> _pushInsets() async {
+    if (_pushingInsets) {
+      _insetsDirty = true;
+      return;
+    }
+    _pushingInsets = true;
     try {
-      await _web.runJavaScript(
-        "document.documentElement.style.setProperty('--ffc-safe-top', '${_safeTop}px');",
-      );
+      do {
+        _insetsDirty = false;
+        await _web.runJavaScript(
+          // Bloque: un `const` global repetido fallaría en la segunda llamada.
+          '{ const s = document.documentElement.style;'
+          " s.setProperty('--ffc-safe-top', '${_safeTop}px');"
+          " s.setProperty('--ffc-safe-bottom', '${_safeBottom}px');"
+          " s.setProperty('--ffc-kb', '${_keyboard}px'); }",
+        );
+      } while (_insetsDirty);
     } catch (_) {
       // Sin página cargada todavía: se aplica en el próximo _inject.
+    } finally {
+      _pushingInsets = false;
     }
   }
 
-  /// La sesión de Foundry vive en las cookies de la WebView y sobrevive a
-  /// reinicios (entra directo con el último usuario). Borrarlas y volver a
-  /// /join permite elegir otro usuario.
+  /// Comandos del menú de la app que el adaptador agrega a la barra del chat.
+  /// Set cerrado: cualquier otro mensaje (otros scripts de la página) se
+  /// ignora.
+  void _onAppCommand(JavaScriptMessage message) {
+    switch (message.message) {
+      case 'exit':
+        widget.onExit();
+      case 'reload':
+        _web.reload();
+      case 'logout':
+        _logOut();
+    }
+  }
+
+  /// Back del sistema: el adaptador cierra el panel de objetivos, el chat o la
+  /// ventana de más arriba (items, contenedores, diálogos). false si no había
+  /// nada que cerrar (o no hay adaptador: login de Foundry).
+  Future<bool> handleBack() async {
+    try {
+      final closed = await _web.runJavaScriptReturningResult(
+        'window.__ffcBack?.() === true',
+      );
+      return closed == true || closed == 1 || closed.toString() == 'true';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// La sesión de Foundry vive en las cookies de la WebView (al abrir /game
+  /// entra directo con el último usuario). Borrarlas y volver a /join permite
+  /// elegir otro usuario.
   Future<void> _logOut() async {
     final ok = await showDialog<bool>(
       context: context,
@@ -227,13 +326,31 @@ class _FoundryWebViewState extends State<_FoundryWebView> {
     await _web.loadRequest(_join);
   }
 
-  Future<void> _inject() async {
+  Future<void> _inject(String url) async {
     try {
       await _web.runJavaScript(await _adapter);
-    } catch (_) {
+      if (kDebugMode) {
+        final ran = await _web.runJavaScriptReturningResult(
+          'window.__ffcAdapter === true',
+        );
+        debugPrint(
+          '[FFoundryCon adapter] ${Uri.tryParse(url)?.path}: ran=$ran',
+        );
+      }
+    } catch (e) {
       // Página sin JS ejecutable (p.ej. error de red): no hay nada que adaptar.
+      // Solo debug: un error del adaptador mismo quedaría invisible.
+      if (kDebugMode) {
+        // El NSError de WKWebView solo dice algo en code/domain/userInfo.
+        final details = e is PlatformException ? e.details as dynamic : null;
+        debugPrint(
+          '[FFoundryCon adapter] $e'
+          '${details == null ? '' : ' code=${details.code} '
+                    'domain=${details.domain} userInfo=${details.userInfo}'}',
+        );
+      }
     }
-    await _pushSafeTop();
+    await _pushInsets();
   }
 
   @override
@@ -266,10 +383,11 @@ class _FoundryWebViewState extends State<_FoundryWebView> {
         ),
       );
     }
-    // Arriba la WebView va por detrás del notch (lo maneja el adaptador con
-    // --ffc-safe-top); el resto del borde sí respeta el área segura.
+    // Arriba y abajo la WebView va por detrás del notch y del indicador de
+    // inicio (los maneja el adaptador); los costados respetan el área segura.
     return SafeArea(
       top: false,
+      bottom: false,
       child: Stack(
         children: [
           WebViewWidget(controller: _web),
@@ -280,53 +398,44 @@ class _FoundryWebViewState extends State<_FoundryWebView> {
               color: AppColors.gold,
               backgroundColor: Colors.transparent,
             ),
-          // Abajo a la izquierda, por encima de la barra de tabs de la hoja
-          // (52px, adapter.css); a la derecha está el botón de chat.
-          Positioned(
-            left: 12,
-            bottom: 64,
-            child: Material(
-              color: AppColors.bg.withAlpha(200),
-              shape: StadiumBorder(
-                side: BorderSide(color: AppColors.gold.withAlpha(90)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    tooltip: 'Volver',
-                    visualDensity: VisualDensity.compact,
-                    onPressed: widget.onExit,
-                    icon: const Icon(
-                      Icons.arrow_back,
-                      size: 20,
-                      color: AppColors.gold,
+          // Fuera de /game (login de Foundry): sin chat ni su menú, la salida
+          // queda abajo a la izquierda.
+          if (!_inGame)
+            Positioned(
+              left: 12,
+              bottom: 16 + _safeBottom,
+              child: Material(
+                color: AppColors.bg.withAlpha(200),
+                shape: StadiumBorder(
+                  side: BorderSide(color: AppColors.gold.withAlpha(90)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      tooltip: 'Volver',
+                      visualDensity: VisualDensity.compact,
+                      onPressed: widget.onExit,
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        size: 20,
+                        color: AppColors.gold,
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    tooltip: 'Recargar Foundry',
-                    visualDensity: VisualDensity.compact,
-                    onPressed: _web.reload,
-                    icon: const Icon(
-                      Icons.refresh,
-                      size: 20,
-                      color: AppColors.gold,
+                    IconButton(
+                      tooltip: 'Recargar Foundry',
+                      visualDensity: VisualDensity.compact,
+                      onPressed: _web.reload,
+                      icon: const Icon(
+                        Icons.refresh,
+                        size: 20,
+                        color: AppColors.gold,
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    tooltip: 'Cerrar sesión de Foundry',
-                    visualDensity: VisualDensity.compact,
-                    onPressed: _logOut,
-                    icon: const Icon(
-                      Icons.logout,
-                      size: 20,
-                      color: AppColors.gold,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

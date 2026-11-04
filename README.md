@@ -16,7 +16,7 @@ Parte de un sistema de 4 componentes ([detalle completo](https://github.com/jose
 
 ## Stack
 
-Flutter 3.35.2 (Dart 3.9) vía **FVM**, Riverpod (estado + DI), `dio`, patrón
+Flutter 3.47.9 (Dart 3.13) vía **FVM**, Riverpod (estado + DI), `dio`, patrón
 repositorio, `json_serializable` + `build_runner`, Material 3 dark.
 
 ## Setup

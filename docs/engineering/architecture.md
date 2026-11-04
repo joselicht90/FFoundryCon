@@ -50,10 +50,11 @@ exactly as in a browser. Contract:
 
 - **URL**: `foundryUrlProvider` (`lib/core/network/foundry_url_provider.dart`),
   user-configured in Settings, `https` only, no default. The page loads
-  `<url>/join`; the player logs in through Foundry's own form. The app never
-  reads or stores the password; the session lives in the platform WebView
-  cookie store and survives restarts. The overlay's logout clears those
-  cookies and reloads `/join` to pick another user.
+  `<url>/game`: with a live Foundry session (platform WebView cookie store)
+  it enters the world directly; without one Foundry's server redirects to
+  `/join`, where the player logs in through Foundry's own form. The app
+  never reads or stores the password. The app menu's logout clears those
+  cookies and loads `/join` to pick another user.
 - **Navigation**: only the Foundry origin (and `about:blank`) is allowed;
   everything else is blocked by the `NavigationDelegate`.
 - **Injection**: after every page load the app runs
@@ -62,12 +63,23 @@ exactly as in a browser. Contract:
   `core.noCanvas` client setting in `localStorage` (reloading `/game` once if
   it was off), injects `adapter.css`, and on `/game` opens the actor's sheet
   full screen with a floating toggle for Foundry's chat sidebar. It is
-  idempotent and has no JS→Dart channel.
+  idempotent. JS→Dart is limited to the `FFoundryCon` `JavaScriptChannel`,
+  which accepts a closed set of commands from the adapter's app menu
+  (`exit`, `reload`, `logout`; anything else is ignored), plus the return
+  value of Dart's call to `window.__ffcBack()`.
 - **Immersive tab**: while the Foundry tab is active `PlayerScreen` drops its
   header, banners and bottom nav and hides the system bars
-  (`SystemUiMode.immersiveSticky`). The WebView sits in a `SafeArea`; a small
-  bottom-left overlay (back + reload) and the system back gesture return to
-  the previous tab and restore `edgeToEdge`.
+  (`SystemUiMode.immersiveSticky`). The WebView extends under the notch and
+  the home indicator (side insets still respected); their heights are pushed
+  as `--ffc-safe-top` / `--ffc-safe-bottom` and the adapter pads for them.
+  On `/game` the app actions (back to the app, reload, Foundry log-out) are
+  buttons the adapter appends to the chat panel's top tab bar; off `/game`
+  (Foundry's join page) a bottom-left overlay offers back + reload. The
+  system back is handled by `FoundrySheetPage` while the tab is active: it
+  calls `window.__ffcBack()`, which closes, in order, the targets panel, the
+  chat panel, or the top framed window other than the main sheet (items,
+  containers, dialogs) and returns whether it closed something; otherwise
+  the tab exits to the previous one and `edgeToEdge` is restored.
 - No canvas means no token targets: MidiQOL attacks from this tab do not
   auto-apply damage. MidiQOL builds an actor token from the prototype with
   `parent: canvas.scene` (null without canvas); the adapter subclasses
@@ -85,9 +97,23 @@ exactly as in a browser. Contract:
   hidden). Never move Foundry's nodes: ApplicationV2 re-renders by part
   (`data-application-part`) and replaces them; only add classes/CSS and
   own `ffc-*` elements re-created on each render (header portrait, sidebar
-  toggle). Scrolling the body collapses the header (`ffc-header-collapsed`);
+  toggle). The sheet opened by the adapter (`ffc-main-sheet`) hides the
+  window close button; every other full-screen sheet stacked on it (items,
+  containers such as a backpack) keeps it, as its only way back. While such
+  a window (or a dialog) is open a ← bubble at the right edge closes the top
+  one.
+  Scrolling the body collapses the header (`ffc-header-collapsed`);
   Foundry's minimum-resolution notifications are hidden. On iOS a
-  long-press shim dispatches `contextmenu` (Android does this natively).
+  long-press shim dispatches `contextmenu` (Android does this natively); it
+  ignores touches that start while or right after something scrolls (a tap
+  that stops momentum scrolling), and sheets disable native text selection
+  outside editable fields. Roll toasts (`PlayerScreen`) are suppressed while
+  the Foundry tab is active; rolls are still marked as seen.
+- **Responsiveness**: the chat panel stays laid out and is hidden with
+  opacity (pre-rendered at `ready`). On the Foundry tab the keyboard does not
+  resize the WebView (`resizeToAvoidBottomInset: false`); its height is
+  pushed as `--ffc-kb` alongside `--ffc-safe-top`. Non-sheet windows
+  (dialogs) are centered between the notch and the bubbles/keyboard.
 - **Debug inspection**: in `kDebugMode` only, the WebView is inspectable
   (`chrome://inspect` on Android, Safari Web Inspector on iOS 16.4+) to tune
   the adapter's selectors. Release builds are not inspectable.
